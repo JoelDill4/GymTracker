@@ -4,12 +4,10 @@
     {
         public List<Routine> GetRoutines();
 
-        public Routine? GetRoutine(string name);
+        public Routine? GetRoutine(Guid id);
 
-        public Routine EditRoutine(string name, string newName);
+        public Routine UpsertRoutine(Routine routine);
 
-        public Routine CreateRoutine(string name);
-
-        public void DeleteRoutine(string name);
+        public void DeleteRoutine(Guid id);
     }
 }

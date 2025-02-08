@@ -19,56 +19,45 @@ namespace GymTracker.Server.Services
             return routines;
         }
 
-        public Routine? GetRoutine(string name)
+        public Routine? GetRoutine(Guid id)
         {
-            Routine? routine = context.Routine.FirstOrDefault(r => r.Name == name);
+            Routine? routine = context.Routine.FirstOrDefault(r => r.Id == id);
 
             return routine;
         }
 
-        public Routine EditRoutine(string name, string newName)
+        public Routine UpsertRoutine(Routine routine)
         {
-            Routine? routine = this.GetRoutine(name);
-
-            if (routine == null)
+            if (routine.Id != Guid.Empty)
             {
-                throw new ArgumentException($"Ya existe una rutina con el nombre \"{name}\".");
+                var existingRoutine = context.Routine.AsNoTracking().FirstOrDefault(r => r.Id == routine.Id);
+
+                if (existingRoutine == null)
+                {
+                    throw new ArgumentException($"No routine found with ID: {routine.Id}");
+                }
+
+                context.Routine.Update(routine);
+                context.SaveChanges();
+                return routine;
             }
 
-            routine.Name = newName;
-
-            context.Routine.Update(routine);
-
-            return routine;
-        }
-
-        public Routine CreateRoutine(string name)
-        {
-            bool repeatedRoutine = (this.GetRoutine(name) != null);
-
-            if (repeatedRoutine)
-            {
-                throw new ArgumentException($"Ya existe una rutina con el nombre \"{name}\".");
-            }
-
-            Routine newRoutine = new Routine(name);
-
-            context.Routine.Add(newRoutine);
+            context.Routine.Add(routine);
             context.SaveChanges();
-
-            return newRoutine;
+            return routine;
         }
 
-        public void DeleteRoutine(string name)
+        public void DeleteRoutine(Guid id)
         {
-            Routine? routine = this.GetRoutine(name);
+            Routine? routine = this.GetRoutine(id);
 
             if (routine == null)
             {
-                throw new ArgumentException($"No existe una rutina con el nombre \"{name}\".");
+                throw new ArgumentException($"A routine with the name: \"{id}\" does not exist");
             }
 
             context.Routine.Remove(routine);
+            context.SaveChanges();
         }
     }
 }

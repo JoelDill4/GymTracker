@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymTracker.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250204205148_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250208195735_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -36,7 +36,7 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BodyParts");
+                    b.ToTable("BodyPart");
                 });
 
             modelBuilder.Entity("Exercise", b =>
@@ -50,24 +50,15 @@ namespace GymTracker.Server.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("Sets")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Exercises");
+                    b.ToTable("Exercise");
                 });
 
             modelBuilder.Entity("ExerciseBodyPart", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BodyPartId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("fk_bodypart")
@@ -78,11 +69,11 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BodyPartId");
+                    b.HasIndex("fk_bodypart");
 
-                    b.HasIndex("ExerciseId");
+                    b.HasIndex("fk_exercise");
 
-                    b.ToTable("ExercisesBodyParts");
+                    b.ToTable("ExerciseBodyPart");
                 });
 
             modelBuilder.Entity("ExerciseExecution", b =>
@@ -102,7 +93,7 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ExerciseExecutions");
+                    b.ToTable("ExerciseExecution");
                 });
 
             modelBuilder.Entity("Routine", b =>
@@ -118,16 +109,13 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Routines");
+                    b.ToTable("Routine");
                 });
 
             modelBuilder.Entity("SubBodyPart", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BodyPartId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -140,9 +128,9 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BodyPartId");
+                    b.HasIndex("fk_bodypart");
 
-                    b.ToTable("SubBodyParts");
+                    b.ToTable("SubBodyPart");
                 });
 
             modelBuilder.Entity("Workout", b =>
@@ -157,7 +145,7 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Workouts");
+                    b.ToTable("Workout");
                 });
 
             modelBuilder.Entity("WorkoutDay", b =>
@@ -178,19 +166,13 @@ namespace GymTracker.Server.Migrations
 
                     b.HasIndex("fk_routine");
 
-                    b.ToTable("WorkoutDays");
+                    b.ToTable("WorkoutDay");
                 });
 
             modelBuilder.Entity("WorkoutDayExercise", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExerciseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WorkoutDayId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("fk_exercise")
@@ -201,24 +183,24 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExerciseId");
+                    b.HasIndex("fk_exercise");
 
-                    b.HasIndex("WorkoutDayId");
+                    b.HasIndex("fk_workoutday");
 
-                    b.ToTable("WorkoutDaysExercises");
+                    b.ToTable("WorkoutDayExercise");
                 });
 
             modelBuilder.Entity("ExerciseBodyPart", b =>
                 {
                     b.HasOne("BodyPart", "BodyPart")
                         .WithMany("ExercisesBodyParts")
-                        .HasForeignKey("BodyPartId")
+                        .HasForeignKey("fk_bodypart")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Exercise", "Exercise")
                         .WithMany("ExercisesBodyParts")
-                        .HasForeignKey("ExerciseId")
+                        .HasForeignKey("fk_exercise")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -231,7 +213,7 @@ namespace GymTracker.Server.Migrations
                 {
                     b.HasOne("BodyPart", "BodyPart")
                         .WithMany()
-                        .HasForeignKey("BodyPartId")
+                        .HasForeignKey("fk_bodypart")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -253,13 +235,13 @@ namespace GymTracker.Server.Migrations
                 {
                     b.HasOne("Exercise", "Exercise")
                         .WithMany("WorkoutDaysExercises")
-                        .HasForeignKey("ExerciseId")
+                        .HasForeignKey("fk_exercise")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WorkoutDay", "WorkoutDay")
                         .WithMany("WorkoutDaysExercises")
-                        .HasForeignKey("WorkoutDayId")
+                        .HasForeignKey("fk_workoutday")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -1,19 +1,17 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 public class ExerciseBodyPart
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; } 
+    public Guid Id { get; set; }
 
     public Guid fk_exercise { get; set; }
-    [ForeignKey("ExerciseId")]
+    [ForeignKey("fk_exercise")]
     public Exercise Exercise { get; set; }
 
     public Guid fk_bodypart { get; set; }
-    [ForeignKey("BodyPartId")]
+    [ForeignKey("fk_bodypart")]
     public BodyPart BodyPart { get; set; }
-
 }

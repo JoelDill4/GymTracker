@@ -8,56 +8,48 @@ namespace GymTracker.Server.Controllers
     [Route("[controller]")]
     public class RoutineController : ControllerBase
     {
-        private readonly IRoutineManager routineManager;
+        private readonly IRoutineManager RoutineManager;
 
         public RoutineController(IRoutineManager routineManager)
         {
-            this.routineManager = routineManager;
+            this.RoutineManager = routineManager;
         }
 
         [HttpGet("all")]
         public IEnumerable<Routine> Get()
         {
-            var routines = routineManager.GetRoutines();
+            var routines = RoutineManager.GetRoutines();
 
             return routines;
         }
 
-        [HttpGet("{name}")]
-        public IActionResult GetRoutineByName(string name)
+        [HttpGet("{id}")]
+        public IActionResult GetRoutine(Guid id)
         {
-            var routine = routineManager.GetRoutine(name);
+            var routine = RoutineManager.GetRoutine(id);
 
             if (routine == null)
             {
-                return NotFound($"Routine with name '{name}' not found.");
+                throw new ArgumentException($"No routine found with ID: {routine.Id}");
             }
 
             return Ok(routine);
         }
 
-        [HttpPut("edit/{name}")]
-        public IActionResult EditRoutine(string name, string newName)
+        [HttpPost("upsert")]
+        public IActionResult CreateOrEditRoutine([FromBody] Routine routine)
         {
-            Routine routine = this.routineManager.EditRoutine(name, newName);
+            Routine routineDef = this.RoutineManager.UpsertRoutine(routine);
 
-            return Ok(routine);
+            return Ok(routineDef);
         }
 
-        [HttpPost("add/{name}")]
-        public IActionResult CreateRoutine(string name)
+        [HttpDelete("delete/{id}")]
+        public IActionResult DeleteRoutine(Guid id)
         {
-            Routine routine = this.routineManager.CreateRoutine(name);
+            this.RoutineManager.DeleteRoutine(id);
 
-            return Ok(routine);
-        }
-
-        [HttpDelete("delete/{name}")]
-        public IActionResult DeleteRoutine(string name)
-        {
-            this.routineManager.DeleteRoutine(name);
-
-            return Ok($"The routine \"{name}\" has been deleted");
+            return Ok($"The routine has been deleted");
         }
     }
 }

@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace GymTracker.Server.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "BodyParts",
+                name: "BodyPart",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -18,11 +18,23 @@ namespace GymTracker.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BodyParts", x => x.Id);
+                    table.PrimaryKey("PK_BodyPart", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExerciseExecutions",
+                name: "Exercise",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exercise", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExerciseExecution",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -32,24 +44,11 @@ namespace GymTracker.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExerciseExecutions", x => x.Id);
+                    table.PrimaryKey("PK_ExerciseExecution", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Exercises",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Sets = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Exercises", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Routines",
+                name: "Routine",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -57,11 +56,11 @@ namespace GymTracker.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Routines", x => x.Id);
+                    table.PrimaryKey("PK_Routine", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Workouts",
+                name: "Workout",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -69,58 +68,55 @@ namespace GymTracker.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Workouts", x => x.Id);
+                    table.PrimaryKey("PK_Workout", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SubBodyParts",
+                name: "SubBodyPart",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    fk_bodypart = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BodyPartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    fk_bodypart = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubBodyParts", x => x.Id);
+                    table.PrimaryKey("PK_SubBodyPart", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SubBodyParts_BodyParts_BodyPartId",
-                        column: x => x.BodyPartId,
-                        principalTable: "BodyParts",
+                        name: "FK_SubBodyPart_BodyPart_fk_bodypart",
+                        column: x => x.fk_bodypart,
+                        principalTable: "BodyPart",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExercisesBodyParts",
+                name: "ExerciseBodyPart",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     fk_exercise = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    fk_bodypart = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BodyPartId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    fk_bodypart = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExercisesBodyParts", x => x.Id);
+                    table.PrimaryKey("PK_ExerciseBodyPart", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ExercisesBodyParts_BodyParts_BodyPartId",
-                        column: x => x.BodyPartId,
-                        principalTable: "BodyParts",
+                        name: "FK_ExerciseBodyPart_BodyPart_fk_bodypart",
+                        column: x => x.fk_bodypart,
+                        principalTable: "BodyPart",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ExercisesBodyParts_Exercises_ExerciseId",
-                        column: x => x.ExerciseId,
-                        principalTable: "Exercises",
+                        name: "FK_ExerciseBodyPart_Exercise_fk_exercise",
+                        column: x => x.fk_exercise,
+                        principalTable: "Exercise",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "WorkoutDays",
+                name: "WorkoutDay",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -129,101 +125,99 @@ namespace GymTracker.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WorkoutDays", x => x.Id);
+                    table.PrimaryKey("PK_WorkoutDay", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WorkoutDays_Routines_fk_routine",
+                        name: "FK_WorkoutDay_Routine_fk_routine",
                         column: x => x.fk_routine,
-                        principalTable: "Routines",
+                        principalTable: "Routine",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "WorkoutDaysExercises",
+                name: "WorkoutDayExercise",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     fk_workoutday = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    WorkoutDayId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    fk_exercise = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    fk_exercise = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WorkoutDaysExercises", x => x.Id);
+                    table.PrimaryKey("PK_WorkoutDayExercise", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WorkoutDaysExercises_Exercises_ExerciseId",
-                        column: x => x.ExerciseId,
-                        principalTable: "Exercises",
+                        name: "FK_WorkoutDayExercise_Exercise_fk_exercise",
+                        column: x => x.fk_exercise,
+                        principalTable: "Exercise",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WorkoutDaysExercises_WorkoutDays_WorkoutDayId",
-                        column: x => x.WorkoutDayId,
-                        principalTable: "WorkoutDays",
+                        name: "FK_WorkoutDayExercise_WorkoutDay_fk_workoutday",
+                        column: x => x.fk_workoutday,
+                        principalTable: "WorkoutDay",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExercisesBodyParts_BodyPartId",
-                table: "ExercisesBodyParts",
-                column: "BodyPartId");
+                name: "IX_ExerciseBodyPart_fk_bodypart",
+                table: "ExerciseBodyPart",
+                column: "fk_bodypart");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExercisesBodyParts_ExerciseId",
-                table: "ExercisesBodyParts",
-                column: "ExerciseId");
+                name: "IX_ExerciseBodyPart_fk_exercise",
+                table: "ExerciseBodyPart",
+                column: "fk_exercise");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SubBodyParts_BodyPartId",
-                table: "SubBodyParts",
-                column: "BodyPartId");
+                name: "IX_SubBodyPart_fk_bodypart",
+                table: "SubBodyPart",
+                column: "fk_bodypart");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkoutDays_fk_routine",
-                table: "WorkoutDays",
+                name: "IX_WorkoutDay_fk_routine",
+                table: "WorkoutDay",
                 column: "fk_routine");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkoutDaysExercises_ExerciseId",
-                table: "WorkoutDaysExercises",
-                column: "ExerciseId");
+                name: "IX_WorkoutDayExercise_fk_exercise",
+                table: "WorkoutDayExercise",
+                column: "fk_exercise");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WorkoutDaysExercises_WorkoutDayId",
-                table: "WorkoutDaysExercises",
-                column: "WorkoutDayId");
+                name: "IX_WorkoutDayExercise_fk_workoutday",
+                table: "WorkoutDayExercise",
+                column: "fk_workoutday");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ExerciseExecutions");
+                name: "ExerciseBodyPart");
 
             migrationBuilder.DropTable(
-                name: "ExercisesBodyParts");
+                name: "ExerciseExecution");
 
             migrationBuilder.DropTable(
-                name: "SubBodyParts");
+                name: "SubBodyPart");
 
             migrationBuilder.DropTable(
-                name: "WorkoutDaysExercises");
+                name: "Workout");
 
             migrationBuilder.DropTable(
-                name: "Workouts");
+                name: "WorkoutDayExercise");
 
             migrationBuilder.DropTable(
-                name: "BodyParts");
+                name: "BodyPart");
 
             migrationBuilder.DropTable(
-                name: "Exercises");
+                name: "Exercise");
 
             migrationBuilder.DropTable(
-                name: "WorkoutDays");
+                name: "WorkoutDay");
 
             migrationBuilder.DropTable(
-                name: "Routines");
+                name: "Routine");
         }
     }
 }
