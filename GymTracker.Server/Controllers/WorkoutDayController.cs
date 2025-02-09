@@ -24,7 +24,7 @@ namespace GymTracker.Server.Controllers
             return workoutDays;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{workoutdayId}")]
         public IActionResult GetWorkoutDay(Guid id)
         {
             var workoutday = WorkoutdayManager.GetWorkoutDay(id);
@@ -45,7 +45,7 @@ namespace GymTracker.Server.Controllers
             return Ok(workoutday);
         }
 
-        [HttpDelete("delete/{name}")]
+        [HttpDelete("delete/{id}")]
         public IActionResult DeleteWorkoutDay(Guid id)
         {
             WorkoutdayManager.DeleteWorkoutDay(id);
@@ -53,12 +53,28 @@ namespace GymTracker.Server.Controllers
             return Ok($"The workoutday has been deleted");
         }
 
-        [HttpPost("addExercise/{workoutDayId}/{exerciseId}")]
+        [HttpGet("getExercisesFromWorkoutDay/{workoutDayId}")]
+        public IEnumerable<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId)
+        {
+            var exercises = WorkoutdayManager.GetExercisesFromWorkoutDay(workoutDayId);
+
+            return exercises;
+        }
+
+        [HttpPost("addExerciseToWorkoutDay/{workoutDayId}/{exerciseId}")]
         public IActionResult AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
             WorkoutdayManager.AddExerciseToWorkoutDay(workoutDayId, exerciseId);
 
             return Ok("The exercise has been added to the workoutDay");
+        }
+
+        [HttpPost("removeExerciseFromWorkoutDay/{workoutDayId}/{exerciseId}")]
+        public IActionResult RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        {
+            WorkoutdayManager.RemoveExerciseFromWorkoutDay(workoutDayId, exerciseId);
+
+            return Ok("The exercise has been removed from the workoutDay");
         }
     }
 }

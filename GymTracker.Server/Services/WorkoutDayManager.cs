@@ -32,6 +32,7 @@ namespace GymTracker.Server.Services
         {
             WorkoutDay? workoutday = context.WorkoutDay
                                             .Include(x => x.Routine)
+                                            .Include(x => x.WorkoutDaysExercises)
                                             .FirstOrDefault(r => r.Id == id);
 
             return workoutday;
@@ -84,6 +85,22 @@ namespace GymTracker.Server.Services
             context.SaveChanges();
         }
 
+        public List<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId)
+        {
+            var workoutDay = this.GetWorkoutDay(workoutDayId);
+
+            if (workoutDay == null)
+            {
+                throw new ArgumentException($"A workout with Id: \"{workoutDayId}\" does not exist.");
+            }
+
+            List<Exercise> exercises = context.WorkoutDayExercise
+                                              .Where(x => x.fk_workoutday == workoutDayId)
+                                              .Select(x => x.Exercise)
+                                              .ToList();
+            return exercises;
+        }
+
         public void AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
             WorkoutDay? workoutDay = this.GetWorkoutDay(workoutDayId);
@@ -113,6 +130,36 @@ namespace GymTracker.Server.Services
             workoutDayExercise = new WorkoutDayExercise(workoutDay, exercise);
 
             context.Add(workoutDayExercise);
+            context.SaveChanges();
+        }
+
+        public void RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        {
+            WorkoutDay? workoutDay = this.GetWorkoutDay(workoutDayId);
+
+            if (workoutDay == null)
+            {
+                throw new ArgumentException($"A workoutday with Id: \"{workoutDayId}\" does not exist.");
+            }
+
+            Exercise? exercise = exerciseManager.GetExercise(exerciseId);
+
+            if (exercise == null)
+            {
+                throw new ArgumentException($"A exercise with Id: \"{exerciseId}\" does not exist.");
+            }
+
+            WorkoutDayExercise? workoutDayExercise = context.WorkoutDayExercise
+                                                    .Where(x => x.fk_exercise == exerciseId &&
+                                                                x.fk_workoutday == workoutDayId)
+                                                    .FirstOrDefault();
+
+            if (workoutDayExercise == null)
+            {
+                throw new ArgumentException($"The exercise is not part of the workoutday");
+            }
+
+            context.Remove(workoutDayExercise);
             context.SaveChanges();
         }
     }

@@ -12,6 +12,10 @@ namespace GymTracker.Server.Services
 
         public void DeleteWorkoutDay(Guid id);
 
+        public List<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId);
+
         public void AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId);
+
+        public void RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId);
     }
 }
