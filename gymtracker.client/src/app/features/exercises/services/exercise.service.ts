@@ -19,6 +19,10 @@ export class ExerciseService {
     return this.http.get<Exercise>(`${this.apiUrl}/${id}`);
   }
 
+  searchExercisesByName(name: string): Observable<Exercise[]> {
+    return this.http.get<Exercise[]>(`${this.apiUrl}/name/${name}`);
+  }
+
   createExercise(exercise: CreateExerciseDto): Observable<Exercise> {
     return this.http.post<Exercise>(this.apiUrl, exercise);
   }

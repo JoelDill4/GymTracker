@@ -1,10 +1,11 @@
-import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ExercisesComponent } from './features/exercises/pages/exercises.component';
+import { ExercisesComponent } from './features/exercises/pages/exercises/exercises.component';
+import { NgModule } from '@angular/core';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: '/exercises', pathMatch: 'full' },
-  { path: 'exercises', component: ExercisesComponent }
+  { path: 'exercises', component: ExercisesComponent },
+  { path: '**', redirectTo: '/exercises' }
 ];
 
 @NgModule({

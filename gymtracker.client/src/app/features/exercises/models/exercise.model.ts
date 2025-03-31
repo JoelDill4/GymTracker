@@ -1,11 +1,6 @@
-export enum BodyPart {
-  Chest = 0,
-  Back = 1,
-  Shoulders = 2,
-  Biceps = 3,
-  Triceps = 4,
-  Legs = 5,
-  Core = 6
+export interface BodyPart {
+  id: string;
+  name: string;
 }
 
 export interface Exercise {

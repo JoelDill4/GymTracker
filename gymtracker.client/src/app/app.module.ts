@@ -2,10 +2,11 @@ import { HttpClientModule, HttpClient, HttpInterceptor, HttpRequest, HttpHandler
 import { NgModule, Injectable } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_BASE_HREF } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { AppRoutingModule } from './app-routing.module';
-import { ExercisesModule } from './features/exercises/exercises.module';
 import { AppComponent } from './app.component';
+import { ExercisesComponent } from './features/exercises/pages/exercises/exercises.component';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
@@ -19,19 +20,17 @@ export class ApiInterceptor implements HttpInterceptor {
 }
 
 @NgModule({
-  declarations: [],
   imports: [
     BrowserModule, 
     HttpClientModule,
-    AppRoutingModule,
-    ExercisesModule,
-    AppComponent
+    FormsModule,
+    AppRoutingModule
   ],
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
     { provide: HTTP_INTERCEPTORS, useClass: ApiInterceptor, multi: true }
   ],
-  bootstrap:[AppComponent]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
 

@@ -6,6 +6,7 @@ namespace GymTracker.Server.Services
     public interface IExerciseManager
     {
         Task<IEnumerable<ExerciseResponseDto>> GetExercisesAsync();
+        Task<IEnumerable<ExerciseResponseDto>> GetExercisesByNameAsync(string name);
         Task<ExerciseResponseDto?> GetExerciseAsync(Guid id);
         Task<ExerciseResponseDto> CreateExerciseAsync(ExerciseDto exerciseDto);
         Task<ExerciseResponseDto> UpdateExerciseAsync(Guid id, ExerciseDto exerciseDto);

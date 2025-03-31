@@ -42,6 +42,15 @@ namespace GymTracker.Server.Controllers
             return Ok(exercise);
         }
 
+        [HttpGet("name/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ExerciseResponseDto>> GetExerciseByName(string name)
+        {
+            var exercise = await _exerciseManager.GetExercisesByNameAsync(name);
+            return Ok(exercise);
+        }
+
         [HttpGet("bodypart/{bodyPart}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ExerciseResponseDto>>> GetExercisesByBodyPart(Guid bodyPart)

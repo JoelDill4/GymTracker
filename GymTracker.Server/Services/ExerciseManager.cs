@@ -37,6 +37,28 @@ namespace GymTracker.Server.Services
             });
         }
 
+        public async Task<IEnumerable<ExerciseResponseDto>> GetExercisesByNameAsync(string name)
+        {
+            var exercises = await _context.Exercise
+                .Include(e => e.bodyPart)
+                .Where(e => !e.isDeleted && e.name.Contains(name))
+                .ToListAsync();
+
+            return exercises.Select(e => new ExerciseResponseDto
+            {
+                id = e.id,
+                name = e.name,
+                description = e.description,
+                createdAt = e.createdAt,
+                updatedAt = e.updatedAt,
+                bodyPart = new BodyPartDto
+                {
+                    id = e.bodyPart.id,
+                    name = e.bodyPart.name
+                }
+            });
+        }
+
         public async Task<ExerciseResponseDto?> GetExerciseAsync(Guid id)
         {
             var exercise = await _context.Exercise
