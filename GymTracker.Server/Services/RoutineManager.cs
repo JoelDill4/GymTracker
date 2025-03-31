@@ -1,63 +1,123 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using GymTracker.Server.DatabaseConnection;
+using GymTracker.Server.Dtos.Routine;
+using GymTracker.Server.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services
 {
+    /// <summary>
+    /// Implementation of IRoutineManager for managing workout routines
+    /// </summary>
     public class RoutineManager : IRoutineManager
     {
-        private readonly AppDbContext context;
+        private readonly GymTrackerContext _context;
 
-        public RoutineManager(AppDbContext context) 
+        /// <summary>
+        /// Initializes a new instance of RoutineManager
+        /// </summary>
+        /// <param name="context">The database context for routine operations</param>
+        public RoutineManager(GymTrackerContext context)
         {
-            this.context = context;
+            _context = context;
         }
 
-        public List<Routine> GetRoutines()
+        /*
+        /// <inheritdoc/>
+        public async Task<IEnumerable<RoutineResponseDto>> GetRoutinesAsync()
         {
-            List<Routine> routines = context.Routine
-                                      .ToList();
-
-            return routines;
-        }
-
-        public Routine? GetRoutine(Guid id)
-        {
-            Routine? routine = context.Routine.FirstOrDefault(r => r.Id == id);
-
-            return routine;
-        }
-
-        public Routine UpsertRoutine(Routine routine)
-        {
-            if (routine.Id != Guid.Empty)
-            {
-                var existingRoutine = context.Routine.AsNoTracking().FirstOrDefault(r => r.Id == routine.Id);
-
-                if (existingRoutine == null)
+            return await _context.Routine
+                .Where(r => !r.IsDeleted)
+                .Select(r => new RoutineResponseDto
                 {
-                    throw new ArgumentException($"No routine found with ID: {routine.Id}");
-                }
-
-                context.Routine.Update(routine);
-                context.SaveChanges();
-                return routine;
-            }
-
-            context.Routine.Add(routine);
-            context.SaveChanges();
-            return routine;
+                    Id = r.Id,
+                    Name = r.Name,
+                    Description = r.Description,
+                    CreatedAt = r.CreatedAt,
+                    UpdatedAt = r.UpdatedAt
+                })
+                .ToListAsync();
         }
 
-        public void DeleteRoutine(Guid id)
+        /// <inheritdoc/>
+        public async Task<RoutineResponseDto?> GetRoutineAsync(Guid id)
         {
-            Routine? routine = this.GetRoutine(id);
+            var routine = await _context.Routine
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
 
             if (routine == null)
-            {
-                throw new ArgumentException($"A routine with the name: \"{id}\" does not exist");
-            }
+                return null;
 
-            context.Routine.Remove(routine);
-            context.SaveChanges();
+            return new RoutineResponseDto
+            {
+                Id = routine.Id,
+                Name = routine.Name,
+                Description = routine.Description,
+                CreatedAt = routine.CreatedAt,
+                UpdatedAt = routine.UpdatedAt
+            };
         }
+
+        /// <inheritdoc/>
+        public async Task<RoutineResponseDto> CreateRoutineAsync(RoutineDto routineDto)
+        {
+            var routine = new Routine(routineDto.Name)
+            {
+                Id = Guid.NewGuid(),
+                Description = routineDto.Description,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Routine.Add(routine);
+            await _context.SaveChangesAsync();
+
+            return new RoutineResponseDto
+            {
+                Id = routine.Id,
+                Name = routine.Name,
+                Description = routine.Description,
+                CreatedAt = routine.CreatedAt
+            };
+        }
+
+        /// <inheritdoc/>
+        public async Task<RoutineResponseDto> UpdateRoutineAsync(Guid id, RoutineDto routineDto)
+        {
+            var routine = await _context.Routine
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (routine == null)
+                throw new KeyNotFoundException($"Routine with ID {id} not found");
+
+            routine.Name = routineDto.Name;
+            routine.Description = routineDto.Description;
+            routine.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new RoutineResponseDto
+            {
+                Id = routine.Id,
+                Name = routine.Name,
+                Description = routine.Description,
+                CreatedAt = routine.CreatedAt,
+                UpdatedAt = routine.UpdatedAt
+            };
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> DeleteRoutineAsync(Guid id)
+        {
+            var routine = await _context.Routine
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (routine == null)
+                return false;
+
+            routine.IsDeleted = true;
+            routine.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }*/
     }
 }

@@ -1,0 +1,43 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Exercises</h1>
+    <button class="btn btn-primary" (click)="onCreateExercise()">
+      <i class="bi bi-plus-lg"></i> Create Exercise
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="exercises.length === 0" class="col-12">
+      <div class="alert alert-info">
+        No exercises found. Click the Create Exercise button to add one.
+      </div>
+    </div>
+
+    <div class="row">
+      <div *ngFor="let exercise of exercises" class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ exercise.name }}</h5>
+            <p class="card-text">{{ exercise.description }}</p>
+            <p class="card-text"><small class="text-muted">Muscle Group: {{ exercise.bodyPart.name }}</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-create-exercise *ngIf="showCreateModal"
+                     (cancel)="onCancel()"
+                     (exerciseCreated)="onExerciseCreated($event)">
+</app-create-exercise>

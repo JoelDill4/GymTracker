@@ -1,15 +1,15 @@
-﻿using GymTracker.Server.Dtos;
+﻿using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Models;
 
 namespace GymTracker.Server.Services
 {
     public interface IExerciseManager
     {
-        public List<Exercise> GetExercises();
-
-        public Exercise? GetExercise(Guid id);
-
-        public Exercise CreateOrEditExercise(ExerciseDto exercise);
-
-        public void DeleteExercise(Guid id);
+        Task<IEnumerable<ExerciseResponseDto>> GetExercisesAsync();
+        Task<ExerciseResponseDto?> GetExerciseAsync(Guid id);
+        Task<ExerciseResponseDto> CreateExerciseAsync(ExerciseDto exerciseDto);
+        Task<ExerciseResponseDto> UpdateExerciseAsync(Guid id, ExerciseDto exerciseDto);
+        Task DeleteExerciseAsync(Guid id);
+        Task<IEnumerable<ExerciseResponseDto>> GetExercisesByBodyPartAsync(Guid bodyPartId);
     }
 }

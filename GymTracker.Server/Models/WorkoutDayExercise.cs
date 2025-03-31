@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+/*
 public class WorkoutDayExercise
 {
     public WorkoutDayExercise() { }
@@ -17,11 +18,11 @@ public class WorkoutDayExercise
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; } 
 
-    public Guid fk_workoutday { get; set; }
+    /*public Guid fk_workoutday { get; set; }
     [ForeignKey("fk_workoutday")]
     public WorkoutDay WorkoutDay { get; set; }
 
     public Guid fk_exercise { get; set; }
     [ForeignKey("fk_exercise")]
     public Exercise Exercise { get; set; }
-}
+}*/

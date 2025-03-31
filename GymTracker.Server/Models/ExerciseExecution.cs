@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+/*
 public class ExerciseExecution
 {
     public ExerciseExecution() { }
@@ -21,6 +22,7 @@ public class ExerciseExecution
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
+    
     public int Order { get; set; }
 
     public int Weight { get; set; }
@@ -38,4 +40,4 @@ public class ExerciseExecution
     [ForeignKey("fk_exercise")]
 
     public Exercise Exercise { get; set; }
-}
+}*/

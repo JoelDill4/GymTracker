@@ -1,15 +1,22 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class BodyPart
+namespace GymTracker.Server.Models
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public class BodyPart
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid id { get; set; }
 
-    [Required]
-    [MaxLength(255)]
-    public string Name { get; set; }
+        [Required]
+        [StringLength(50)]
+        public string name { get; set; }
 
-    public List<ExerciseBodyPart> ExercisesBodyParts { get; set; } = new List<ExerciseBodyPart>();
-}
+        public DateTime createdAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? updatedAt { get; set; }
+
+        public bool isDeleted { get; set; } = false;
+    }
+} 

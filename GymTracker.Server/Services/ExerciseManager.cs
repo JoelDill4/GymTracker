@@ -1,73 +1,142 @@
-﻿using GymTracker.Server.Dtos;
-using Microsoft.AspNetCore.Routing;
+﻿using GymTracker.Server.DatabaseConnection;
+using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services
 {
     public class ExerciseManager : IExerciseManager
     {
-        private readonly AppDbContext context;
+        private readonly GymTrackerContext _context;
 
-        private readonly IRoutineManager routineManager;
-
-        public ExerciseManager(AppDbContext context, IRoutineManager routineManager) 
+        public ExerciseManager(GymTrackerContext context)
         {
-            this.context = context;
-            this.routineManager = routineManager;
+            _context = context;
         }
 
-        public List<Exercise> GetExercises()
+        public async Task<IEnumerable<ExerciseResponseDto>> GetExercisesAsync()
         {
-            List<Exercise> exercises = context.Exercise
-                                                  .ToList();
+            var exercises = await _context.Exercise
+                .Include(e => e.bodyPart)
+                .Where(e => !e.isDeleted)
+                .ToListAsync();
 
-            return exercises;
-        }
-
-        public Exercise? GetExercise(Guid id)
-        {
-            Exercise? exercise = context.Exercise
-                                            .FirstOrDefault(r => r.Id == id);
-
-            return exercise;
-        }
-
-        public Exercise CreateOrEditExercise(ExerciseDto ExerciseDto)
-        {
-            if (ExerciseDto.Id != null)
+            return exercises.Select(e => new ExerciseResponseDto
             {
-                var existingExercise = context.Exercise.FirstOrDefault(r => r.Id == ExerciseDto.Id);
-
-                if (existingExercise == null)
+                id = e.id,
+                name = e.name,
+                description = e.description,
+                createdAt = e.createdAt,
+                updatedAt = e.updatedAt,
+                bodyPart = new BodyPartDto
                 {
-                    throw new ArgumentException($"No workout found with ID: {ExerciseDto.Id}");
+                    id = e.bodyPart.id,
+                    name = e.bodyPart.name
                 }
-
-                existingExercise.Name = ExerciseDto.Name;
-
-                context.Exercise.Update(existingExercise);
-                context.SaveChanges();
-                return existingExercise;
-            }
-
-            Exercise exercise = new Exercise(ExerciseDto.Name);
-
-            context.Exercise.Add(exercise);
-            context.SaveChanges();
-            return exercise;
+            });
         }
 
-        public void DeleteExercise(Guid id)
+        public async Task<ExerciseResponseDto?> GetExerciseAsync(Guid id)
         {
-            Exercise? exercise = this.GetExercise(id);
+            var exercise = await _context.Exercise
+                .Include(e => e.bodyPart)
+                .FirstOrDefaultAsync(e => e.id == id && !e.isDeleted);
 
             if (exercise == null)
-            {
-                throw new ArgumentException($"A exercise with Id: \"{id}\" does not exist.");
-            }
+                return null;
 
-            context.Exercise.Remove(exercise);
-            context.SaveChanges();
+            return new ExerciseResponseDto
+            {
+                id = exercise.id,
+                name = exercise.name,
+                description = exercise.description,
+                createdAt = exercise.createdAt,
+                updatedAt = exercise.updatedAt,
+                bodyPart = new BodyPartDto
+                {
+                    id = exercise.bodyPart.id,
+                    name = exercise.bodyPart.name
+                }
+            };
+        }
+
+        public async Task<ExerciseResponseDto> CreateExerciseAsync([FromBody] ExerciseDto exerciseDto)
+        {
+            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodypart);
+            if (bodyPart == null)
+                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodypart} not found");
+
+            var exercise = new Exercise
+            {
+                id = Guid.NewGuid(),
+                name = exerciseDto.name,
+                description = exerciseDto.description,
+                fk_bodypart = exerciseDto.fk_bodypart,
+                createdAt = DateTime.UtcNow
+            };
+
+            _context.Exercise.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            return await GetExerciseAsync(exercise.id);
+        }
+
+        public async Task<ExerciseResponseDto> UpdateExerciseAsync(Guid id, [FromBody] ExerciseDto exerciseDto)
+        {
+            var exercise = await _context.Exercise
+                .FirstOrDefaultAsync(e => e.id == id && !e.isDeleted);
+
+            if (exercise == null)
+                throw new KeyNotFoundException($"Exercise with ID {id} not found");
+
+            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodypart);
+            if (bodyPart == null)
+                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodypart} not found");
+
+            exercise.name = exerciseDto.name;
+            exercise.description = exerciseDto.description;
+            exercise.fk_bodypart = exerciseDto.fk_bodypart;
+            exercise.updatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return await GetExerciseAsync(exercise.id);
+        }
+
+        public async Task DeleteExerciseAsync(Guid id)
+        {
+            var exercise = await _context.Exercise
+                .FirstOrDefaultAsync(e => e.id == id && !e.isDeleted);
+
+            if (exercise == null)
+                throw new KeyNotFoundException($"Exercise with ID {id} not found");
+
+            exercise.isDeleted = true;
+            exercise.updatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<ExerciseResponseDto>> GetExercisesByBodyPartAsync(Guid bodyPartId)
+        {
+            var exercises = await _context.Exercise
+                .Include(e => e.bodyPart)
+                .Where(e => !e.isDeleted && e.fk_bodypart == bodyPartId)
+                .ToListAsync();
+
+            return exercises.Select(e => new ExerciseResponseDto
+            {
+                id = e.id,
+                name = e.name,
+                description = e.description,
+                createdAt = e.createdAt,
+                updatedAt = e.updatedAt,
+                bodyPart = new BodyPartDto
+                {
+                    id = e.bodyPart.id,
+                    name = e.bodyPart.name
+                }
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-using GymTracker.Server.Dtos;
+using GymTracker.Server.Dtos.WorkoutDay;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
@@ -6,57 +6,127 @@ using System.Net.Mime;
 namespace GymTracker.Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
+    [Produces(MediaTypeNames.Application.Json)]
     public class WorkoutDayController : ControllerBase
     {
-        private readonly IWorkoutDayManager WorkoutdayManager;
+        private readonly IWorkoutDayManager _workoutDayManager;
+        private readonly ILogger<WorkoutDayController> _logger;
 
-        public WorkoutDayController(IWorkoutDayManager workoutdayManager)
+        public WorkoutDayController(IWorkoutDayManager workoutDayManager, ILogger<WorkoutDayController> logger)
         {
-            this.WorkoutdayManager = workoutdayManager;
+            _workoutDayManager = workoutDayManager;
+            _logger = logger;
         }
 
-        [HttpGet("all")]
-        public IEnumerable<WorkoutDay> GetWorkoutDays()
+        /*[HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<WorkoutDayResponseDto>>> GetWorkoutDays()
         {
-            var workoutDays = WorkoutdayManager.GetWorkoutDays();
-
-            return workoutDays;
+            var workoutDays = await _workoutDayManager.GetWorkoutDaysAsync();
+            return Ok(workoutDays);
         }
 
-        [HttpGet("{workoutdayId}")]
-        public IActionResult GetWorkoutDay(Guid id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<WorkoutDayResponseDto>> GetWorkoutDay(Guid id)
         {
-            var workoutday = WorkoutdayManager.GetWorkoutDay(id);
-
-            if (workoutday == null)
+            var workoutDay = await _workoutDayManager.GetWorkoutDayAsync(id);
+            
+            if (workoutDay == null)
             {
-                return NotFound($"WorkoutDay with Id '{id}' not found.");
+                return NotFound($"Workout day with ID {id} not found");
             }
 
-            return Ok(workoutday);
+            return Ok(workoutDay);
         }
 
-        [HttpPost("upsert")]
-        public IActionResult CreateOrEditWorkoutDay([FromBody] WorkoutDayDto workoutDay)
+        [HttpGet("routine/{routineId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<WorkoutDayResponseDto>>> GetWorkoutDaysByRoutine(Guid routineId)
         {
-            WorkoutDay workoutday = WorkoutdayManager.CreateOrEditWorkoutDay(workoutDay);
+            var workoutDays = await _workoutDayManager.GetWorkoutDaysByRoutineAsync(routineId);
+            return Ok(workoutDays);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<WorkoutDayResponseDto>> CreateWorkoutDay([FromBody] WorkoutDayDto workoutDayDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var createdWorkoutDay = await _workoutDayManager.CreateWorkoutDayAsync(workoutDayDto);
+                return CreatedAtAction(nameof(GetWorkoutDay), new { id = createdWorkoutDay.Id }, createdWorkoutDay);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating workout day");
+                return StatusCode(500, "An error occurred while creating the workout day");
+            }
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<WorkoutDayResponseDto>> UpdateWorkoutDay(Guid id, [FromBody] WorkoutDayDto workoutDayDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != workoutDayDto.Id)
+            {
+                return BadRequest("ID in URL must match ID in body");
+            }
+
+            try
+            {
+                var updatedWorkoutDay = await _workoutDayManager.UpdateWorkoutDayAsync(id, workoutDayDto);
+                return Ok(updatedWorkoutDay);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Workout day with ID {id} not found");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating workout day");
+                return StatusCode(500, "An error occurred while updating the workout day");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteWorkoutDay(Guid id)
+        {
+            var deleted = await _workoutDayManager.DeleteWorkoutDayAsync(id);
             
-            return Ok(workoutday);
-        }
+            if (!deleted)
+            {
+                return NotFound($"Workout day with ID {id} not found");
+            }
 
-        [HttpDelete("delete/{id}")]
-        public IActionResult DeleteWorkoutDay(Guid id)
-        {
-            WorkoutdayManager.DeleteWorkoutDay(id);
-
-            return Ok($"The workoutday has been deleted");
+            return NoContent();
         }
 
         [HttpGet("getExercisesFromWorkoutDay/{workoutDayId}")]
         public IEnumerable<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId)
         {
-            var exercises = WorkoutdayManager.GetExercisesFromWorkoutDay(workoutDayId);
+            var exercises = _workoutDayManager.GetExercisesFromWorkoutDay(workoutDayId);
 
             return exercises;
         }
@@ -64,7 +134,7 @@ namespace GymTracker.Server.Controllers
         [HttpPost("addExerciseToWorkoutDay/{workoutDayId}/{exerciseId}")]
         public IActionResult AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
-            WorkoutdayManager.AddExerciseToWorkoutDay(workoutDayId, exerciseId);
+            _workoutDayManager.AddExerciseToWorkoutDay(workoutDayId, exerciseId);
 
             return Ok("The exercise has been added to the workoutDay");
         }
@@ -72,9 +142,9 @@ namespace GymTracker.Server.Controllers
         [HttpPost("removeExerciseFromWorkoutDay/{workoutDayId}/{exerciseId}")]
         public IActionResult RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
-            WorkoutdayManager.RemoveExerciseFromWorkoutDay(workoutDayId, exerciseId);
+            _workoutDayManager.RemoveExerciseFromWorkoutDay(workoutDayId, exerciseId);
 
             return Ok("The exercise has been removed from the workoutDay");
-        }
+        }*/
     }
 }

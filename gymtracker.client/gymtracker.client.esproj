@@ -7,4 +7,8 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\gymtracker.client\browser\</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="src\app\features\exercises\pages\exercises\**" />
+    <TypeScriptConfiguration Remove="src\app\features\exercises\pages\exercises\**" />
+  </ItemGroup>
 </Project>

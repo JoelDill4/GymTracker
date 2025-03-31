@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
+/*
 public class SubBodyPart
 {
     [Key]
@@ -14,4 +15,4 @@ public class SubBodyPart
     public Guid fk_bodypart { get; set; }
     [ForeignKey("fk_bodypart")]
     public BodyPart BodyPart { get; set; }
-}
+}*/

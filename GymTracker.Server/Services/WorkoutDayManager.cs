@@ -1,166 +1,233 @@
-﻿using GymTracker.Server.Dtos;
-using Microsoft.AspNetCore.Routing;
+﻿using GymTracker.Server.DatabaseConnection;
+using GymTracker.Server.Dtos.WorkoutDay;
+using GymTracker.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services
 {
     public class WorkoutDayManager : IWorkoutDayManager
     {
-        private readonly AppDbContext context;
+        private readonly GymTrackerContext _context;
 
-        private readonly IRoutineManager routineManager;
-
-        private readonly IExerciseManager exerciseManager;
-
-        public WorkoutDayManager(AppDbContext context, IRoutineManager routineManager, IExerciseManager exerciseManager) 
+        public WorkoutDayManager(GymTrackerContext context)
         {
-            this.context = context;
-            this.routineManager = routineManager;
-            this.exerciseManager = exerciseManager;
+            _context = context;
         }
 
-        public List<WorkoutDay> GetWorkoutDays()
+        /*public async Task<IEnumerable<WorkoutDayResponseDto>> GetWorkoutDaysAsync()
         {
-            List<WorkoutDay> workoutDays = context.WorkoutDay
-                                                  .Include(x => x.Routine)
-                                                  .ToList();
-
-            return workoutDays;
+            return await _context.WorkoutDay
+                .Where(wd => !wd.IsDeleted)
+                .Include(wd => wd.Routine)
+                .Include(wd => wd.WorkoutDayExercises)
+                    .ThenInclude(wde => wde.Exercise)
+                        .ThenInclude(e => e.ExerciseBodyParts)
+                            .ThenInclude(eb => eb.BodyPart)
+                .Select(wd => new WorkoutDayResponseDto
+                {
+                    Id = wd.Id,
+                    Name = wd.Name,
+                    CreatedAt = wd.CreatedAt,
+                    UpdatedAt = wd.UpdatedAt,
+                    RoutineId = wd.RoutineId,
+                    RoutineName = wd.Routine.Name,
+                    Exercises = wd.WorkoutDayExercises
+                        .Select(wde => new WorkoutDayExerciseResponseDto
+                        {
+                            Id = wde.Id,
+                            ExerciseId = wde.fk_exercise,
+                            ExerciseName = wde.Exercise.Name,
+                            BodyParts = wde.Exercise.ExerciseBodyParts
+                                .Select(eb => new BodyPartDto
+                                {
+                                    Id = eb.BodyPart.Id,
+                                    Name = eb.BodyPart.Name
+                                })
+                                .ToList()
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
         }
 
-        public WorkoutDay? GetWorkoutDay(Guid id)
+        public async Task<WorkoutDayResponseDto?> GetWorkoutDayAsync(Guid id)
         {
-            WorkoutDay? workoutday = context.WorkoutDay
-                                            .Include(x => x.Routine)
-                                            .Include(x => x.WorkoutDaysExercises)
-                                            .FirstOrDefault(r => r.Id == id);
+            var workoutDay = await _context.WorkoutDay
+                .Include(wd => wd.Routine)
+                .Include(wd => wd.WorkoutDayExercises)
+                    .ThenInclude(wde => wde.Exercise)
+                        .ThenInclude(e => e.ExerciseBodyParts)
+                            .ThenInclude(eb => eb.BodyPart)
+                .FirstOrDefaultAsync(wd => wd.Id == id && !wd.IsDeleted);
 
-            return workoutday;
+            if (workoutDay == null)
+                return null;
+
+            return new WorkoutDayResponseDto
+            {
+                Id = workoutDay.Id,
+                Name = workoutDay.Name,
+                CreatedAt = workoutDay.CreatedAt,
+                UpdatedAt = workoutDay.UpdatedAt,
+                RoutineId = workoutDay.RoutineId,
+                RoutineName = workoutDay.Routine.Name,
+                Exercises = workoutDay.WorkoutDayExercises
+                    .Select(wde => new WorkoutDayExerciseResponseDto
+                    {
+                        Id = wde.Id,
+                        ExerciseId = wde.ExerciseId,
+                        ExerciseName = wde.Exercise.Name,
+                        Sets = wde.Sets,
+                        Reps = wde.Reps,
+                        Weight = wde.Weight,
+                        BodyParts = wde.Exercise.ExerciseBodyParts
+                            .Select(eb => new BodyPartDto
+                            {
+                                Id = eb.BodyPart.Id,
+                                Name = eb.BodyPart.Name
+                            })
+                            .ToList()
+                    })
+                    .ToList()
+            };
         }
 
-        public WorkoutDay CreateOrEditWorkoutDay(WorkoutDayDto workoutDayDto)
+        public async Task<WorkoutDayResponseDto> CreateWorkoutDayAsync(WorkoutDayDto workoutDayDto)
         {
-            Routine? routine = routineManager.GetRoutine(workoutDayDto.fk_routine);
+            var routine = await _context.Routine
+                .FirstOrDefaultAsync(r => r.Id == workoutDayDto.RoutineId && !r.IsDeleted);
 
             if (routine == null)
-            {
-                throw new ArgumentException($"No routine found with ID: {workoutDayDto.fk_routine}");
-            }
+                throw new KeyNotFoundException($"Routine with ID {workoutDayDto.RoutineId} not found");
 
-            if (workoutDayDto.Id != null)
+            var workoutDay = new WorkoutDay
             {
-                var existingWorkoutDay = context.WorkoutDay.FirstOrDefault(r => r.Id == workoutDayDto.Id);
+                Id = Guid.NewGuid(),
+                Name = workoutDayDto.Name,
+                RoutineId = workoutDayDto.RoutineId,
+                CreatedAt = DateTime.UtcNow
+            };
 
-                if (existingWorkoutDay == null)
+            // Add exercises
+            foreach (var exercise in workoutDayDto.Exercises)
+            {
+                var exerciseEntity = await _context.Exercise
+                    .FirstOrDefaultAsync(e => e.Id == exercise.ExerciseId && !e.IsDeleted);
+
+                if (exerciseEntity == null)
+                    throw new KeyNotFoundException($"Exercise with ID {exercise.ExerciseId} not found");
+
+                workoutDay.WorkoutDayExercises.Add(new WorkoutDayExercise
                 {
-                    throw new ArgumentException($"No workout found with ID: {workoutDayDto.Id}");
-                }
-
-                existingWorkoutDay.Name = workoutDayDto.Name;
-                existingWorkoutDay.fk_routine = workoutDayDto.fk_routine;
-                existingWorkoutDay.Routine = routine;
-   
-                context.WorkoutDay.Update(existingWorkoutDay);
-                context.SaveChanges();
-                return existingWorkoutDay;
+                    WorkoutDayId = workoutDay.Id,
+                    ExerciseId = exercise.ExerciseId,
+                    Sets = exercise.Sets,
+                    Reps = exercise.Reps,
+                    Weight = exercise.Weight
+                });
             }
 
-            WorkoutDay workoutday = new WorkoutDay(workoutDayDto.Name, routine);
+            _context.WorkoutDay.Add(workoutDay);
+            await _context.SaveChangesAsync();
 
-            context.WorkoutDay.Add(workoutday);
-            context.SaveChanges();
-            return workoutday;
+            return await GetWorkoutDayAsync(workoutDay.Id);
         }
 
-        public void DeleteWorkoutDay(Guid id)
+        public async Task<WorkoutDayResponseDto> UpdateWorkoutDayAsync(Guid id, WorkoutDayDto workoutDayDto)
         {
-            WorkoutDay? workoutday = this.GetWorkoutDay(id);
-
-            if (workoutday == null)
-            {
-                throw new ArgumentException($"A workout with Id: \"{id}\" does not exist.");
-            }
-
-            context.WorkoutDay.Remove(workoutday);
-            context.SaveChanges();
-        }
-
-        public List<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId)
-        {
-            var workoutDay = this.GetWorkoutDay(workoutDayId);
+            var workoutDay = await _context.WorkoutDays
+                .Include(wd => wd.WorkoutDayExercises)
+                .FirstOrDefaultAsync(wd => wd.Id == id && !wd.IsDeleted);
 
             if (workoutDay == null)
+                throw new KeyNotFoundException($"Workout day with ID {id} not found");
+
+            var routine = await _context.Routines
+                .FirstOrDefaultAsync(r => r.Id == workoutDayDto.RoutineId && !r.IsDeleted);
+
+            if (routine == null)
+                throw new KeyNotFoundException($"Routine with ID {workoutDayDto.RoutineId} not found");
+
+            workoutDay.Name = workoutDayDto.Name;
+            workoutDay.RoutineId = workoutDayDto.RoutineId;
+            workoutDay.UpdatedAt = DateTime.UtcNow;
+
+            // Update exercises
+            _context.WorkoutDayExercises.RemoveRange(workoutDay.WorkoutDayExercises);
+            foreach (var exercise in workoutDayDto.Exercises)
             {
-                throw new ArgumentException($"A workout with Id: \"{workoutDayId}\" does not exist.");
+                var exerciseEntity = await _context.Exercises
+                    .FirstOrDefaultAsync(e => e.Id == exercise.ExerciseId && !e.IsDeleted);
+
+                if (exerciseEntity == null)
+                    throw new KeyNotFoundException($"Exercise with ID {exercise.ExerciseId} not found");
+
+                workoutDay.WorkoutDayExercises.Add(new WorkoutDayExercise
+                {
+                    WorkoutDayId = workoutDay.Id,
+                    ExerciseId = exercise.ExerciseId,
+                    Sets = exercise.Sets,
+                    Reps = exercise.Reps,
+                    Weight = exercise.Weight
+                });
             }
 
-            List<Exercise> exercises = context.WorkoutDayExercise
-                                              .Where(x => x.fk_workoutday == workoutDayId)
-                                              .Select(x => x.Exercise)
-                                              .ToList();
-            return exercises;
+            await _context.SaveChangesAsync();
+            return await GetWorkoutDayAsync(workoutDay.Id);
         }
 
-        public void AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        public async Task<bool> DeleteWorkoutDayAsync(Guid id)
         {
-            WorkoutDay? workoutDay = this.GetWorkoutDay(workoutDayId);
+            var workoutDay = await _context.WorkoutDays
+                .FirstOrDefaultAsync(wd => wd.Id == id && !wd.IsDeleted);
 
             if (workoutDay == null)
-            {
-                throw new ArgumentException($"A workoutday with Id: \"{workoutDayId}\" does not exist.");
-            }
+                return false;
 
-            Exercise? exercise = exerciseManager.GetExercise(exerciseId);
+            workoutDay.IsDeleted = true;
+            workoutDay.UpdatedAt = DateTime.UtcNow;
 
-            if (exercise == null)
-            {
-                throw new ArgumentException($"A exercise with Id: \"{exerciseId}\" does not exist.");
-            }
-
-            WorkoutDayExercise? workoutDayExercise = context.WorkoutDayExercise
-                                                    .Where(x => x.fk_exercise == exerciseId && 
-                                                                x.fk_workoutday == workoutDayId)
-                                                    .FirstOrDefault();
-
-            if (workoutDayExercise != null)
-            {
-                throw new ArgumentException($"The exercise is already part of the workoutday");
-            }
-
-            workoutDayExercise = new WorkoutDayExercise(workoutDay, exercise);
-
-            context.Add(workoutDayExercise);
-            context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public void RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        public async Task<IEnumerable<WorkoutDayResponseDto>> GetWorkoutDaysByRoutineAsync(Guid routineId)
         {
-            WorkoutDay? workoutDay = this.GetWorkoutDay(workoutDayId);
-
-            if (workoutDay == null)
-            {
-                throw new ArgumentException($"A workoutday with Id: \"{workoutDayId}\" does not exist.");
-            }
-
-            Exercise? exercise = exerciseManager.GetExercise(exerciseId);
-
-            if (exercise == null)
-            {
-                throw new ArgumentException($"A exercise with Id: \"{exerciseId}\" does not exist.");
-            }
-
-            WorkoutDayExercise? workoutDayExercise = context.WorkoutDayExercise
-                                                    .Where(x => x.fk_exercise == exerciseId &&
-                                                                x.fk_workoutday == workoutDayId)
-                                                    .FirstOrDefault();
-
-            if (workoutDayExercise == null)
-            {
-                throw new ArgumentException($"The exercise is not part of the workoutday");
-            }
-
-            context.Remove(workoutDayExercise);
-            context.SaveChanges();
-        }
+            return await _context.WorkoutDays
+                .Where(wd => !wd.IsDeleted && wd.RoutineId == routineId)
+                .Include(wd => wd.Routine)
+                .Include(wd => wd.WorkoutDayExercises)
+                    .ThenInclude(wde => wde.Exercise)
+                        .ThenInclude(e => e.ExerciseBodyParts)
+                            .ThenInclude(eb => eb.BodyPart)
+                .Select(wd => new WorkoutDayResponseDto
+                {
+                    Id = wd.Id,
+                    Name = wd.Name,
+                    CreatedAt = wd.CreatedAt,
+                    UpdatedAt = wd.UpdatedAt,
+                    RoutineId = wd.RoutineId,
+                    RoutineName = wd.Routine.Name,
+                    Exercises = wd.WorkoutDayExercises
+                        .Select(wde => new WorkoutDayExerciseResponseDto
+                        {
+                            Id = wde.Id,
+                            ExerciseId = wde.ExerciseId,
+                            ExerciseName = wde.Exercise.Name,
+                            Sets = wde.Sets,
+                            Reps = wde.Reps,
+                            Weight = wde.Weight,
+                            BodyParts = wde.Exercise.ExerciseBodyParts
+                                .Select(eb => new BodyPartDto
+                                {
+                                    Id = eb.BodyPart.Id,
+                                    Name = eb.BodyPart.Name
+                                })
+                                .ToList()
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+        }*/
     }
 }
