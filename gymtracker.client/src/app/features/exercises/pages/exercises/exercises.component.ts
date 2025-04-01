@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Exercise } from '../../models/exercise.model';
 import { ExerciseService } from '../../services/exercise.service';
+import { BodyPartService } from '../../services/body-part.service';
+import { BodyPart } from '../../models/body-part.model';
 import { CreateExerciseComponent } from '../../components/create-exercise/create-exercise.component';
 
 @Component({
@@ -45,6 +47,29 @@ import { CreateExerciseComponent } from '../../components/create-exercise/create
               type="button" 
               (click)="clearSearch()"
               *ngIf="searchTerm">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white">
+              <i class="bi bi-person-arms-up"></i>
+            </span>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedBodyPartId"
+              (ngModelChange)="onBodyPartChange()">
+              <option [ngValue]="null">All Body Parts</option>
+              <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">
+                {{ bodyPart.name }}
+              </option>
+            </select>
+            <button 
+              class="btn btn-outline-secondary" 
+              type="button" 
+              (click)="clearBodyPartFilter()"
+              *ngIf="selectedBodyPartId">
               <i class="bi bi-x-lg"></i>
             </button>
           </div>
@@ -130,11 +155,11 @@ import { CreateExerciseComponent } from '../../components/create-exercise/create
       border-right: none;
     }
 
-    .form-control {
+    .form-control, .form-select {
       border-left: none;
     }
 
-    .form-control:focus {
+    .form-control:focus, .form-select:focus {
       border-color: var(--border-color);
       box-shadow: none;
     }
@@ -151,18 +176,24 @@ import { CreateExerciseComponent } from '../../components/create-exercise/create
 })
 export class ExercisesComponent implements OnInit, AfterViewInit {
   exercises: Exercise[] = [];
+  bodyParts: BodyPart[] = [];
   loading = false;
   error: string | null = null;
   showCreateModal = false;
   searchTerm = '';
+  selectedBodyPartId: string | null = null;
 
-  constructor(private exerciseService: ExerciseService) {
+  constructor(
+    private exerciseService: ExerciseService,
+    private bodyPartService: BodyPartService
+  ) {
     console.log('ExercisesComponent constructed');
   }
 
   ngOnInit(): void {
     console.log('ExercisesComponent initialized');
     this.loadExercises();
+    this.loadBodyParts();
   }
 
   ngAfterViewInit(): void {
@@ -183,6 +214,17 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
         console.error('Error loading exercises:', error);
         this.error = 'Failed to load exercises';
         this.loading = false;
+      }
+    });
+  }
+
+  loadBodyParts(): void {
+    this.bodyPartService.getBodyParts().subscribe({
+      next: (data) => {
+        this.bodyParts = data;
+      },
+      error: (error) => {
+        console.error('Error loading body parts:', error);
       }
     });
   }
@@ -210,9 +252,35 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
     });
   }
 
+  onBodyPartChange(): void {
+    if (!this.selectedBodyPartId) {
+      this.loadExercises();
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+    this.exerciseService.getExercisesByBodyPart(this.selectedBodyPartId).subscribe({
+      next: (data) => {
+        this.exercises = data;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error filtering by body part:', error);
+        this.error = 'Failed to filter exercises by body part';
+        this.loading = false;
+      }
+    });
+  }
+
   clearSearch(): void {
     console.log('Clearing search');
     this.searchTerm = '';
+    this.loadExercises();
+  }
+
+  clearBodyPartFilter(): void {
+    this.selectedBodyPartId = null;
     this.loadExercises();
   }
 

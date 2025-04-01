@@ -52,4 +52,8 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+// Explicitly set the URLs
+app.Urls.Add("https://localhost:7175");
+app.Urls.Add("http://localhost:5175");
+
 app.Run();

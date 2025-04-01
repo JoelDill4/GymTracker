@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BodyPart } from '../models/exercise.model';
+import { BodyPart } from '../models/body-part.model';
 
 @Injectable({
   providedIn: 'root'

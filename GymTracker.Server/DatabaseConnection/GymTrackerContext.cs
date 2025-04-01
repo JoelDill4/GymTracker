@@ -5,19 +5,16 @@ namespace GymTracker.Server.DatabaseConnection
 {
     public class GymTrackerContext : DbContext
     {
-        public GymTrackerContext()
+        public GymTrackerContext(DbContextOptions<GymTrackerContext> options)
+            : base(options)
         {
         }
 
-        public GymTrackerContext(DbContextOptions<GymTrackerContext> options) : base(options) { }
-
-        // public DbSet<Routine> Routine { get; set; }
+        public DbSet<Exercise> Exercise { get; set; }
+        public DbSet<BodyPart> BodyPart { get; set; }
+        public DbSet<Routine> Routine { get; set; }
 
         // public DbSet<WorkoutDay> WorkoutDay { get; set; }
-
-        public DbSet<Exercise> Exercise { get; set; }
-
-        public DbSet<BodyPart> BodyPart { get; set; }
 
         // public DbSet<WorkoutDayExercise> WorkoutDayExercise { get; set; }
 
@@ -26,5 +23,17 @@ namespace GymTracker.Server.DatabaseConnection
         // public DbSet<Workout> Workout { get; set; }
 
         // public DbSet<ExerciseExecution> ExerciseExecution { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Exercise>()
+                .HasOne(e => e.bodyPart)
+                .WithMany()
+                .HasForeignKey("fk_bodypart");
+
+            modelBuilder.Entity<Routine>();
+        }
     }
 }

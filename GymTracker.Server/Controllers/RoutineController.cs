@@ -2,6 +2,7 @@ using GymTracker.Server.Dtos.Routine;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using GymTracker.Server.Models;
 
 namespace GymTracker.Server.Controllers
 {
@@ -27,14 +28,14 @@ namespace GymTracker.Server.Controllers
             _logger = logger;
         }
 
-        /*
+        
         /// <summary>
         /// Gets all non-deleted routines
         /// </summary>
         /// <returns>A collection of routines</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<RoutineResponseDto>>> GetRoutines()
+        public async Task<ActionResult<IEnumerable<Routine>>> GetRoutines()
         {
             var routines = await _routineManager.GetRoutinesAsync();
             return Ok(routines);
@@ -48,13 +49,13 @@ namespace GymTracker.Server.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<RoutineResponseDto>> GetRoutine(Guid id)
+        public async Task<ActionResult<Routine>> GetRoutine(Guid id)
         {
             var routine = await _routineManager.GetRoutineAsync(id);
             
             if (routine == null)
             {
-                return NotFound($"Routine with ID {id} not found");
+                return NotFound();
             }
 
             return Ok(routine);
@@ -68,7 +69,7 @@ namespace GymTracker.Server.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<RoutineResponseDto>> CreateRoutine([FromBody] RoutineDto routineDto)
+        public async Task<ActionResult<Routine>> CreateRoutine(RoutineDto routineDto)
         {
             if (!ModelState.IsValid)
             {
@@ -77,8 +78,14 @@ namespace GymTracker.Server.Controllers
 
             try
             {
-                var createdRoutine = await _routineManager.CreateRoutineAsync(routineDto);
-                return CreatedAtAction(nameof(GetRoutine), new { id = createdRoutine.Id }, createdRoutine);
+                var routine = new Routine
+                {
+                    name = routineDto.name,
+                    description = routineDto.description
+                };
+
+                var createdRoutine = await _routineManager.CreateRoutineAsync(routine);
+                return CreatedAtAction(nameof(GetRoutine), new { id = createdRoutine.id }, createdRoutine);
             }
             catch (Exception ex)
             {
@@ -97,31 +104,27 @@ namespace GymTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<RoutineResponseDto>> UpdateRoutine(Guid id, [FromBody] RoutineDto routineDto)
+        public async Task<ActionResult<Routine>> UpdateRoutine(Guid id, RoutineDto routineDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != routineDto.Id)
-            {
-                return BadRequest("ID in URL must match ID in body");
-            }
-
             try
             {
-                var updatedRoutine = await _routineManager.UpdateRoutineAsync(id, routineDto);
+                var routine = new Routine
+                {
+                    name = routineDto.name,
+                    description = routineDto.description
+                };
+
+                var updatedRoutine = await _routineManager.UpdateRoutineAsync(id, routine);
                 return Ok(updatedRoutine);
             }
             catch (KeyNotFoundException)
             {
-                return NotFound($"Routine with ID {id} not found");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating routine");
-                return StatusCode(500, "An error occurred while updating the routine");
+                return NotFound();
             }
         }
 
@@ -135,14 +138,15 @@ namespace GymTracker.Server.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteRoutine(Guid id)
         {
-            var deleted = await _routineManager.DeleteRoutineAsync(id);
-            
-            if (!deleted)
+            try
             {
-                return NotFound($"Routine with ID {id} not found");
+                await _routineManager.DeleteRoutineAsync(id);
+                return NoContent();
             }
-
-            return NoContent();
-        }*/
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
 }

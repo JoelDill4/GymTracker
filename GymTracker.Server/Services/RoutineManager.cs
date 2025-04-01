@@ -21,103 +21,64 @@ namespace GymTracker.Server.Services
             _context = context;
         }
 
-        /*
         /// <inheritdoc/>
-        public async Task<IEnumerable<RoutineResponseDto>> GetRoutinesAsync()
+        public async Task<IEnumerable<Routine>> GetRoutinesAsync()
         {
             return await _context.Routine
-                .Where(r => !r.IsDeleted)
-                .Select(r => new RoutineResponseDto
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Description = r.Description,
-                    CreatedAt = r.CreatedAt,
-                    UpdatedAt = r.UpdatedAt
-                })
+                .Where(r => !r.isDeleted)
                 .ToListAsync();
         }
 
         /// <inheritdoc/>
-        public async Task<RoutineResponseDto?> GetRoutineAsync(Guid id)
+        public async Task<Routine?> GetRoutineAsync(Guid id)
         {
-            var routine = await _context.Routine
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-
-            if (routine == null)
-                return null;
-
-            return new RoutineResponseDto
-            {
-                Id = routine.Id,
-                Name = routine.Name,
-                Description = routine.Description,
-                CreatedAt = routine.CreatedAt,
-                UpdatedAt = routine.UpdatedAt
-            };
+            return await _context.Routine
+                .FirstOrDefaultAsync(r => r.id == id && !r.isDeleted);
         }
 
         /// <inheritdoc/>
-        public async Task<RoutineResponseDto> CreateRoutineAsync(RoutineDto routineDto)
+        public async Task<Routine> CreateRoutineAsync(Routine routine)
         {
-            var routine = new Routine(routineDto.Name)
-            {
-                Id = Guid.NewGuid(),
-                Description = routineDto.Description,
-                CreatedAt = DateTime.UtcNow
-            };
+            routine.id = Guid.NewGuid();
+            routine.createdAt = DateTime.UtcNow;
+            routine.updatedAt = DateTime.UtcNow;
+            routine.isDeleted = false;
 
             _context.Routine.Add(routine);
             await _context.SaveChangesAsync();
-
-            return new RoutineResponseDto
-            {
-                Id = routine.Id,
-                Name = routine.Name,
-                Description = routine.Description,
-                CreatedAt = routine.CreatedAt
-            };
+            return routine;
         }
 
         /// <inheritdoc/>
-        public async Task<RoutineResponseDto> UpdateRoutineAsync(Guid id, RoutineDto routineDto)
+        public async Task<Routine> UpdateRoutineAsync(Guid id, Routine routine)
+        {
+            var existingRoutine = await _context.Routine
+                .FirstOrDefaultAsync(r => r.id == id && !r.isDeleted);
+
+            if (existingRoutine == null)
+                throw new KeyNotFoundException($"Routine with ID {id} not found");
+
+            existingRoutine.name = routine.name;
+            existingRoutine.description = routine.description;
+            existingRoutine.updatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return existingRoutine;
+        }
+
+        /// <inheritdoc/>
+        public async Task DeleteRoutineAsync(Guid id)
         {
             var routine = await _context.Routine
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+                .FirstOrDefaultAsync(r => r.id == id && !r.isDeleted);
 
             if (routine == null)
                 throw new KeyNotFoundException($"Routine with ID {id} not found");
 
-            routine.Name = routineDto.Name;
-            routine.Description = routineDto.Description;
-            routine.UpdatedAt = DateTime.UtcNow;
+            routine.isDeleted = true;
+            routine.updatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-
-            return new RoutineResponseDto
-            {
-                Id = routine.Id,
-                Name = routine.Name,
-                Description = routine.Description,
-                CreatedAt = routine.CreatedAt,
-                UpdatedAt = routine.UpdatedAt
-            };
         }
-
-        /// <inheritdoc/>
-        public async Task<bool> DeleteRoutineAsync(Guid id)
-        {
-            var routine = await _context.Routine
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-
-            if (routine == null)
-                return false;
-
-            routine.IsDeleted = true;
-            routine.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return true;
-        }*/
     }
 }

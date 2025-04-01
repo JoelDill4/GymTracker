@@ -34,4 +34,8 @@ export class ExerciseService {
   deleteExercise(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  getExercisesByBodyPart(bodyPartId: string): Observable<Exercise[]> {
+    return this.http.get<Exercise[]>(`${this.apiUrl}/bodypart/${bodyPartId}`);
+  }
 } 
