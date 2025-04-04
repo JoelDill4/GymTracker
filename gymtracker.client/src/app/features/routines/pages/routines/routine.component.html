@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Routines</h2>
+    <button class="btn btn-primary" (click)="showCreateModal = true">
+      <i class="bi bi-plus-lg"></i> New Routine
+    </button>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let routine of routines">
+                  <td>{{ routine.name }}</td>
+                  <td>{{ routine.description }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/routines', routine.id]">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="editRoutine(routine)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteRoutine(routine.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-create-routine *ngIf="showCreateModal" (close)="showCreateModal = false" (created)="onRoutineCreated()"></app-create-routine>
+<app-edit-routine *ngIf="showEditModal" [routine]="selectedRoutine" (close)="showEditModal = false" (updated)="onRoutineUpdated()"></app-edit-routine>

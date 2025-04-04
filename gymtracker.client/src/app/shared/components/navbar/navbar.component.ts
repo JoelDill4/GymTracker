@@ -17,6 +17,11 @@ import { RouterLink } from '@angular/router';
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
+              <a class="nav-link" routerLink="/routines">
+                <i class="bi bi-list-check me-1"></i>Routines
+              </a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" routerLink="/exercises">
                 <i class="bi bi-list-check me-1"></i>Exercises
               </a>
