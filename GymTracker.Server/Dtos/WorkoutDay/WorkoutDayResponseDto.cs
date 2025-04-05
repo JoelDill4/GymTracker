@@ -1,17 +1,25 @@
+using GymTracker.Server.Dtos.Routine;
+
 namespace GymTracker.Server.Dtos.WorkoutDay
 {
     public class WorkoutDayResponseDto
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public Guid RoutineId { get; set; }
-        public string RoutineName { get; set; }
-        public List<WorkoutDayExerciseResponseDto> Exercises { get; set; } = new();
+        public Guid id { get; set; }
+
+        public string name { get; set; }
+
+        public string? description { get; set; }
+
+        public RoutineResponseDto? routine { get; set; }
+
+        public DateTime createdAt { get; set; }
+
+        public DateTime? updatedAt { get; set; }
+
+        // public List<WorkoutDayExerciseResponseDto> Exercises { get; set; } = new();
     }
 
-    public class WorkoutDayExerciseResponseDto
+    /*public class WorkoutDayExerciseResponseDto
     {
         public Guid Id { get; set; }
         public Guid ExerciseId { get; set; }
@@ -26,5 +34,5 @@ namespace GymTracker.Server.Dtos.WorkoutDay
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-    }
+    }*/
 } 

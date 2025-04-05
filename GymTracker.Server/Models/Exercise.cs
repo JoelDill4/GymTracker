@@ -14,7 +14,7 @@ namespace GymTracker.Server.Models
         public string name { get; set; }
 
         [StringLength(500)]
-        public string? description { get; set; }
+        public string description { get; set; } = string.Empty;
 
         [Required]
         public Guid fk_bodypart { get; set; }

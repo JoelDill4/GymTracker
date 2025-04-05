@@ -5,6 +5,9 @@ using System.Net.Mime;
 
 namespace GymTracker.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing exercises
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -13,12 +16,21 @@ namespace GymTracker.Server.Controllers
         private readonly IExerciseManager _exerciseManager;
         private readonly ILogger<ExerciseController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of ExerciseController
+        /// </summary>
+        /// <param name="exerciseManager">The exercise manager service</param>
+        /// <param name="logger">The logger service</param>
         public ExerciseController(IExerciseManager exerciseManager, ILogger<ExerciseController> logger)
         {
             _exerciseManager = exerciseManager;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gets all non-deleted exercises
+        /// </summary>
+        /// <returns>A collection of exercises</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ExerciseResponseDto>>> GetExercises()
@@ -27,6 +39,11 @@ namespace GymTracker.Server.Controllers
             return Ok(exercises);
         }
 
+        /// <summary>
+        /// Gets a specific exercise by ID
+        /// </summary>
+        /// <param name="id">The ID of the exercise to retrieve</param>
+        /// <returns>The exercise if found</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,6 +59,11 @@ namespace GymTracker.Server.Controllers
             return Ok(exercise);
         }
 
+        /// <summary>
+        /// Gets exercises by name
+        /// </summary>
+        /// <param name="name">The name to search for</param>
+        /// <returns>A collection of exercises matching the name</returns>
         [HttpGet("name/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,6 +73,11 @@ namespace GymTracker.Server.Controllers
             return Ok(exercise);
         }
 
+        /// <summary>
+        /// Gets exercises by body part
+        /// </summary>
+        /// <param name="bodyPart">The ID of the body part to filter by</param>
+        /// <returns>A collection of exercises for the specified body part</returns>
         [HttpGet("bodypart/{bodyPart}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ExerciseResponseDto>>> GetExercisesByBodyPart(Guid bodyPart)
@@ -59,6 +86,11 @@ namespace GymTracker.Server.Controllers
             return Ok(exercises);
         }
 
+        /// <summary>
+        /// Creates a new exercise
+        /// </summary>
+        /// <param name="exerciseDto">The exercise data to create</param>
+        /// <returns>The created exercise</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,6 +117,12 @@ namespace GymTracker.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing exercise
+        /// </summary>
+        /// <param name="id">The ID of the exercise to update</param>
+        /// <param name="exerciseDto">The updated exercise data</param>
+        /// <returns>The updated exercise</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -112,6 +150,11 @@ namespace GymTracker.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes an exercise
+        /// </summary>
+        /// <param name="id">The ID of the exercise to delete</param>
+        /// <returns>No content if successful</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

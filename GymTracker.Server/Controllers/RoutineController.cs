@@ -3,6 +3,7 @@ using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 using GymTracker.Server.Models;
+using GymTracker.Server.Dtos.WorkoutDay;
 
 namespace GymTracker.Server.Controllers
 {
@@ -15,6 +16,7 @@ namespace GymTracker.Server.Controllers
     public class RoutineController : ControllerBase
     {
         private readonly IRoutineManager _routineManager;
+        private readonly IWorkoutDayManager _workoutDayManager;
         private readonly ILogger<RoutineController> _logger;
 
         /// <summary>
@@ -22,9 +24,10 @@ namespace GymTracker.Server.Controllers
         /// </summary>
         /// <param name="routineManager">The routine manager service</param>
         /// <param name="logger">The logger service</param>
-        public RoutineController(IRoutineManager routineManager, ILogger<RoutineController> logger)
+        public RoutineController(IRoutineManager routineManager, IWorkoutDayManager workoutDayManager, ILogger<RoutineController> logger)
         {
             _routineManager = routineManager;
+            _workoutDayManager = workoutDayManager;
             _logger = logger;
         }
 
@@ -55,10 +58,18 @@ namespace GymTracker.Server.Controllers
             
             if (routine == null)
             {
-                return NotFound();
+                return NotFound($"Routine with ID {id} not found");
             }
 
             return Ok(routine);
+        }
+
+        [HttpGet("workoutDays/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<WorkoutDayResponseDto>>> GetWorkoutDaysByRoutine(Guid id)
+        {
+            var workoutDays = await _workoutDayManager.GetWorkoutDaysByRoutineAsync(id);
+            return Ok(workoutDays);
         }
 
         /// <summary>
@@ -124,7 +135,7 @@ namespace GymTracker.Server.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound();
+                return NotFound($"Routine with ID {id} not found");
             }
         }
 
@@ -145,7 +156,7 @@ namespace GymTracker.Server.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound();
+                return NotFound($"Routine with ID {id} not found");
             }
         }
     }

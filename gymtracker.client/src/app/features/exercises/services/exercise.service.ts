@@ -15,7 +15,7 @@ export class ExerciseService {
     return this.http.get<Exercise[]>(this.apiUrl);
   }
 
-  getExercise(id: number): Observable<Exercise> {
+  getExercise(id: string): Observable<Exercise> {
     return this.http.get<Exercise>(`${this.apiUrl}/${id}`);
   }
 

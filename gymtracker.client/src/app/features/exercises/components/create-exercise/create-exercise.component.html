@@ -1,0 +1,94 @@
+<div class="modal fade show" style="display: block;" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-plus-circle me-2"></i>Create Exercise
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="onCancel()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form (ngSubmit)="onSubmit()" #exerciseForm="ngForm">
+          <div class="mb-4">
+            <label for="name" class="form-label fw-bold">Name</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-tag"></i>
+              </span>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                [(ngModel)]="exercise.name" 
+                name="name" 
+                required
+                minlength="3"
+                maxlength="100"
+                placeholder="Enter exercise name"
+                #name="ngModel">
+            </div>
+            <div class="text-danger mt-1" *ngIf="name.invalid && (name.dirty || name.touched)">
+              <small *ngIf="name.errors?.['required']">Name is required</small>
+              <small *ngIf="name.errors?.['minlength']">Name must be at least 3 characters</small>
+              <small *ngIf="name.errors?.['maxlength']">Name cannot exceed 100 characters</small>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="form-label fw-bold">Description</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-card-text"></i>
+              </span>
+              <textarea 
+                class="form-control" 
+                id="description" 
+                [(ngModel)]="exercise.description" 
+                name="description" 
+                rows="3"
+                maxlength="500"
+                placeholder="Enter exercise description"
+                #description="ngModel"></textarea>
+            </div>
+            <div class="text-danger mt-1" *ngIf="description.invalid && (description.dirty || description.touched)">
+              <small *ngIf="description.errors?.['maxlength']">Description cannot exceed 500 characters</small>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="bodyPart" class="form-label fw-bold">Body Part</label>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-person-arms-up"></i>
+              </span>
+              <select 
+                class="form-select" 
+                id="bodyPart" 
+                [(ngModel)]="selectedBodyPartId" 
+                name="bodyPart" 
+                required
+                #bodypart="ngModel">
+                <option value="">Select a body part</option>
+                <option *ngFor="let part of bodyParts" [value]="part.id">
+                  {{ part.name }}
+                </option>
+              </select>
+            </div>
+            <div class="text-danger mt-1" *ngIf="bodypart.invalid && (bodypart.dirty || bodypart.touched)">
+              <small *ngIf="bodypart.errors?.['required']">Body part is required</small>
+            </div>
+          </div>
+          <div class="modal-footer border-0 px-0">
+            <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+              <i class="bi bi-x-circle me-2"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="!exerciseForm.valid">
+              <i class="bi bi-check-circle me-2"></i>Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show"></div> 

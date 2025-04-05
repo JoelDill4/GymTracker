@@ -14,7 +14,7 @@ namespace GymTracker.Server.DatabaseConnection
         public DbSet<BodyPart> BodyPart { get; set; }
         public DbSet<Routine> Routine { get; set; }
 
-        // public DbSet<WorkoutDay> WorkoutDay { get; set; }
+        public DbSet<WorkoutDay> WorkoutDay { get; set; }
 
         // public DbSet<WorkoutDayExercise> WorkoutDayExercise { get; set; }
 

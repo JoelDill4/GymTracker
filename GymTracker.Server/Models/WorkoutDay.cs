@@ -1,29 +1,29 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-/*
 namespace GymTracker.Server.Models
 {
     public class WorkoutDay
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
+        public Guid id { get; set; }
 
         [Required]
         [StringLength(100, MinimumLength = 3)]
-        public string Name { get; set; }
+        public string name { get; set; }
+
+        [StringLength(500)]
+        public string description { get; set; } = string.Empty;
 
         [Required]
-        public Guid RoutineId { get; set; }
+        public Guid routineId { get; set; }
 
-        [ForeignKey("RoutineId")]
-        public virtual Routine Routine { get; set; }
+        [ForeignKey("routineId")]
+        public virtual Routine routine { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; }
-
-        public virtual ICollection<Workout> Workouts { get; set; } = new List<Workout>();
+        public DateTime createdAt { get; set; } = DateTime.UtcNow;
+        public DateTime? updatedAt { get; set; }
+        public bool isDeleted { get; set; } = false;
     }
-}*/
+}

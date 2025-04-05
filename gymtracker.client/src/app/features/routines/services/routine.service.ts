@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Routine } from '../models/routine.model';
+import { WorkoutDay } from '../../workoutDays/models/workoutday.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,10 @@ export class RoutineService {
 
   getRoutine(id: string): Observable<Routine> {
     return this.http.get<Routine>(`${this.apiUrl}/${id}`);
+  }
+
+  getWorkoutDaysByRoutine(id: string): Observable<WorkoutDay[]> {
+    return this.http.get<WorkoutDay[]>(`${this.apiUrl}/workoutDays/${id}`);
   }
 
   createRoutine(routine: Omit<Routine, 'id' | 'createdAt' | 'updatedAt' | 'isDeleted'>): Observable<Routine> {
