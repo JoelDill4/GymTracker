@@ -49,5 +49,28 @@ namespace GymTracker.Server.Services
         /// <param name="id">The ID of the workout day to delete</param>
         /// <returns>True if the workout day was successfully deleted, false otherwise</returns>
         Task<bool> DeleteWorkoutDayAsync(Guid id);
+
+        /// <summary>
+        /// Gets all exercises associated with a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <returns>A collection of exercises</returns>
+        Task<IEnumerable<Exercise>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
+
+        /// <summary>
+        /// Adds an exercise to a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exerciseId">The ID of the exercise to add</param>
+        /// <returns>Task</returns>
+        Task AddExerciseToWorkoutDayAsync(Guid workoutDayId, Guid exerciseId);
+
+        /// <summary>
+        /// Removes an exercise from a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exerciseId">The ID of the exercise to remove</param>
+        /// <returns>Task</returns>
+        Task RemoveExerciseFromWorkoutDayAsync(Guid workoutDayId, Guid exerciseId);
     }
 }

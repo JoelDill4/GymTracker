@@ -3,7 +3,7 @@
     <h2>
       <i class="bi bi-calendar-week me-2"></i>Routines
     </h2>
-    <button class="btn btn-primary" (click)="showCreateModal = true">
+    <button class="btn btn-primary" (click)="openCreateModal()">
       <i class="bi bi-plus-lg"></i> New Routine
     </button>
   </div>
@@ -29,7 +29,7 @@
                     <button class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/routines', routine.id]">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="editRoutine(routine)">
+                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="openEditModal(routine)">
                       <i class="bi bi-pencil"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-danger" (click)="deleteRoutine(routine.id)">
@@ -46,5 +46,10 @@
   </div>
 </div>
 
-<app-create-routine *ngIf="showCreateModal" (close)="showCreateModal = false" (created)="onRoutineCreated()"></app-create-routine>
-<app-edit-routine *ngIf="showEditModal" [routine]="selectedRoutine" (close)="showEditModal = false" (updated)="onRoutineUpdated()"></app-edit-routine>
+<app-create-edit-routine 
+  *ngIf="showCreateModal" 
+  [routineToEdit]="routineToEdit"
+  (close)="onModalClosed()" 
+  (created)="onRoutineCreated($event)"
+  (updated)="onRoutineUpdated($event)">
+</app-create-edit-routine>

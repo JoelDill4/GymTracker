@@ -2,6 +2,7 @@ using GymTracker.Server.Dtos.WorkoutDay;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using GymTracker.Server.Models;
 
 namespace GymTracker.Server.Controllers
 {
@@ -143,28 +144,85 @@ namespace GymTracker.Server.Controllers
             return NoContent();
         }
 
-        /*[HttpGet("getExercisesFromWorkoutDay/{workoutDayId}")]
-        public IEnumerable<Exercise> GetExercisesFromWorkoutDay(Guid workoutDayId)
+        /// <summary>
+        /// Gets all exercises from a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <returns>A collection of exercises</returns>
+        [HttpGet("exercises/{workoutDayId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Exercise>>> GetExercisesFromWorkoutDay(Guid workoutDayId)
         {
-            var exercises = _workoutDayManager.GetExercisesFromWorkoutDay(workoutDayId);
-
-            return exercises;
+            try
+            {
+                var exercises = await _workoutDayManager.GetExercisesFromWorkoutDayAsync(workoutDayId);
+                return Ok(exercises);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Workout day with ID {workoutDayId} not found");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting exercises from workout day");
+                return StatusCode(500, "An error occurred while getting exercises from the workout day");
+            }
         }
 
-        [HttpPost("addExerciseToWorkoutDay/{workoutDayId}/{exerciseId}")]
-        public IActionResult AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        /// <summary>
+        /// Adds an exercise to a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exerciseId">The ID of the exercise to add</param>
+        /// <returns>No content if successful</returns>
+        [HttpPost("exercises/{workoutDayId}/{exerciseId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AddExerciseToWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
-            _workoutDayManager.AddExerciseToWorkoutDay(workoutDayId, exerciseId);
-
-            return Ok("The exercise has been added to the workoutDay");
+            try
+            {
+                await _workoutDayManager.AddExerciseToWorkoutDayAsync(workoutDayId, exerciseId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding exercise to workout day");
+                return StatusCode(500, "An error occurred while adding the exercise to the workout day");
+            }
         }
 
-        [HttpPost("removeExerciseFromWorkoutDay/{workoutDayId}/{exerciseId}")]
-        public IActionResult RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
+        /// <summary>
+        /// Removes an exercise from a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exerciseId">The ID of the exercise to remove</param>
+        /// <returns>No content if successful</returns>
+        [HttpDelete("exercises/{workoutDayId}/{exerciseId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RemoveExerciseFromWorkoutDay(Guid workoutDayId, Guid exerciseId)
         {
-            _workoutDayManager.RemoveExerciseFromWorkoutDay(workoutDayId, exerciseId);
-
-            return Ok("The exercise has been removed from the workoutDay");
-        }*/
+            try
+            {
+                await _workoutDayManager.RemoveExerciseFromWorkoutDayAsync(workoutDayId, exerciseId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing exercise from workout day");
+                return StatusCode(500, "An error occurred while removing the exercise from the workout day");
+            }
+        }
     }
 }

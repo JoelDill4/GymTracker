@@ -5,7 +5,7 @@ import { WorkoutDayService } from '../../../workoutDays/services/workoutday.serv
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CreateWorkoutDayComponent } from '../../../workoutDays/components/create-workout-day/create-workout-day.component';
+import { CreateWorkoutDayComponent } from '../../../workoutDays/components/create-edit-workout-day/create-edit-workout-day.component';
 import { of, throwError } from 'rxjs';
 import { Routine } from '../../models/routine.model';
 import { WorkoutDay } from '../../../workoutDays/models/workoutday.model';

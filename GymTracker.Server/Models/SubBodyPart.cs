@@ -12,7 +12,7 @@ public class SubBodyPart
     [MaxLength(255)]
     public string Name { get; set; }
 
-    public Guid fk_bodypart { get; set; }
-    [ForeignKey("fk_bodypart")]
+    public Guid fk_bodyPart { get; set; }
+    [ForeignKey("fk_bodyPart")]
     public BodyPart BodyPart { get; set; }
 }*/

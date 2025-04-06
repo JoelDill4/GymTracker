@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymTracker.Server.Migrations
 {
     [DbContext(typeof(GymTrackerContext))]
-    [Migration("20250405124754_workoutDay")]
-    partial class workoutDay
+    [Migration("20250406200449_initialCreate")]
+    partial class initialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,6 +47,64 @@ namespace GymTracker.Server.Migrations
                     b.HasKey("id");
 
                     b.ToTable("BodyPart");
+
+                    b.HasData(
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8903),
+                            isDeleted = false,
+                            name = "Chest"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8930),
+                            isDeleted = false,
+                            name = "Back"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000003"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8939),
+                            isDeleted = false,
+                            name = "Shoulders"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000004"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8947),
+                            isDeleted = false,
+                            name = "Biceps"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000005"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8955),
+                            isDeleted = false,
+                            name = "Triceps"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000006"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8965),
+                            isDeleted = false,
+                            name = "Forearms"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000007"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8973),
+                            isDeleted = false,
+                            name = "Legs"
+                        },
+                        new
+                        {
+                            id = new Guid("00000000-0000-0000-0000-000000000008"),
+                            createdAt = new DateTime(2025, 4, 6, 20, 4, 49, 133, DateTimeKind.Utc).AddTicks(8981),
+                            isDeleted = false,
+                            name = "Core"
+                        });
                 });
 
             modelBuilder.Entity("GymTracker.Server.Models.Exercise", b =>
@@ -63,7 +121,7 @@ namespace GymTracker.Server.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid>("fk_bodypart")
+                    b.Property<Guid>("fk_bodyPart")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("isDeleted")
@@ -79,7 +137,7 @@ namespace GymTracker.Server.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("fk_bodypart");
+                    b.HasIndex("fk_bodyPart");
 
                     b.ToTable("Exercise");
                 });
@@ -128,6 +186,9 @@ namespace GymTracker.Server.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid>("fk_routine")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("isDeleted")
                         .HasColumnType("bit");
 
@@ -136,24 +197,45 @@ namespace GymTracker.Server.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("routineId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("updatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("id");
 
-                    b.HasIndex("routineId");
+                    b.HasIndex("fk_routine");
 
                     b.ToTable("WorkoutDay");
+                });
+
+            modelBuilder.Entity("GymTracker.Server.Models.WorkoutDayExercise", b =>
+                {
+                    b.Property<Guid>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("fk_exercise")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("fk_workoutDay")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("workoutDayId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("fk_exercise");
+
+                    b.HasIndex("workoutDayId");
+
+                    b.ToTable("WorkoutDayExercise");
                 });
 
             modelBuilder.Entity("GymTracker.Server.Models.Exercise", b =>
                 {
                     b.HasOne("GymTracker.Server.Models.BodyPart", "bodyPart")
                         .WithMany()
-                        .HasForeignKey("fk_bodypart")
+                        .HasForeignKey("fk_bodyPart")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -164,11 +246,40 @@ namespace GymTracker.Server.Migrations
                 {
                     b.HasOne("GymTracker.Server.Models.Routine", "routine")
                         .WithMany()
-                        .HasForeignKey("routineId")
+                        .HasForeignKey("fk_routine")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("routine");
+                });
+
+            modelBuilder.Entity("GymTracker.Server.Models.WorkoutDayExercise", b =>
+                {
+                    b.HasOne("GymTracker.Server.Models.Exercise", "exercise")
+                        .WithMany("workoutDayExercises")
+                        .HasForeignKey("fk_exercise")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GymTracker.Server.Models.WorkoutDay", "workoutDay")
+                        .WithMany("workoutDayExercises")
+                        .HasForeignKey("workoutDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("exercise");
+
+                    b.Navigation("workoutDay");
+                });
+
+            modelBuilder.Entity("GymTracker.Server.Models.Exercise", b =>
+                {
+                    b.Navigation("workoutDayExercises");
+                });
+
+            modelBuilder.Entity("GymTracker.Server.Models.WorkoutDay", b =>
+                {
+                    b.Navigation("workoutDayExercises");
                 });
 #pragma warning restore 612, 618
         }

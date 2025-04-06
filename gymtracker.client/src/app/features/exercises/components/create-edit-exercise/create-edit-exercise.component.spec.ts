@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { CreateExerciseComponent } from './create-exercise.component';
+import { CreateExerciseComponent } from './create-edit-exercise.component';
 import { ExerciseService } from '../../services/exercise.service';
 import { BodyPartService } from '../../../bodyParts/services/body-part.service';
 import { Exercise } from '../../models/exercise.model';
@@ -30,8 +30,18 @@ describe('CreateExerciseComponent', () => {
     }
   ];
 
+  const mockExercise: Exercise = {
+    id: '1',
+    name: 'Test Exercise',
+    description: 'Test Description',
+    bodyPart: {
+      id: '1',
+      name: 'Chest'
+    }
+  };
+
   beforeEach(async () => {
-    const exerciseSpy = jasmine.createSpyObj('ExerciseService', ['createExercise']);
+    const exerciseSpy = jasmine.createSpyObj('ExerciseService', ['createExercise', 'updateExercise']);
     const bodyPartSpy = jasmine.createSpyObj('BodyPartService', ['getBodyParts']);
     bodyPartSpy.getBodyParts.and.returnValue(of(mockBodyParts));
 
@@ -57,6 +67,7 @@ describe('CreateExerciseComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('Initialization', () => {
   it('should initialize with empty exercise and load body parts', () => {
     expect(component.exercise).toEqual({
       name: '',
@@ -67,9 +78,21 @@ describe('CreateExerciseComponent', () => {
       }
     });
     expect(component.selectedBodyPartId).toBe('');
+      expect(component.isEditing).toBeFalse();
     expect(bodyPartService.getBodyParts).toHaveBeenCalled();
   });
 
+    it('should initialize in edit mode when exerciseToEdit is provided', () => {
+      component.exerciseToEdit = mockExercise;
+      component.ngOnInit();
+
+      expect(component.isEditing).toBeTrue();
+      expect(component.exercise).toEqual(mockExercise);
+      expect(component.selectedBodyPartId).toBe(mockExercise.bodyPart.id);
+    });
+  });
+
+  describe('Body Parts', () => {
   it('should load body parts on init', fakeAsync(() => {
     component.ngOnInit();
     tick();
@@ -78,15 +101,22 @@ describe('CreateExerciseComponent', () => {
     expect(component.bodyParts).toEqual(mockBodyParts);
   }));
 
-  it('should emit cancel event when onCancel is called', () => {
-    spyOn(component.cancel, 'emit');
-    component.onCancel();
-    expect(component.cancel.emit).toHaveBeenCalled();
+    it('should handle error when loading body parts fails', fakeAsync(() => {
+      bodyPartService.getBodyParts.and.returnValue(throwError(() => new Error('Failed to load')));
+      const consoleSpy = spyOn(console, 'error');
+
+      component.ngOnInit();
+      tick();
+
+      expect(bodyPartService.getBodyParts).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Error loading body parts:', jasmine.any(Error));
+    }));
   });
 
+  describe('Create Mode', () => {
   it('should create exercise and emit event on successful submit', fakeAsync(() => {
     const newExercise: Exercise = {
-      id: 1,
+        id: '2',
       name: 'Bench Press',
       description: 'Chest exercise',
       bodyPart: {
@@ -100,7 +130,7 @@ describe('CreateExerciseComponent', () => {
     component.selectedBodyPartId = '1';
 
     exerciseService.createExercise.and.returnValue(of(newExercise));
-    spyOn(component.exerciseCreated, 'emit');
+      const createdSpy = spyOn(component.exerciseCreated, 'emit');
 
     component.onSubmit();
     tick();
@@ -108,9 +138,9 @@ describe('CreateExerciseComponent', () => {
     expect(exerciseService.createExercise).toHaveBeenCalledWith({
       name: 'Bench Press',
       description: 'Chest exercise',
-      fk_bodypart: '1'
+      fk_bodyPart: '1'
     });
-    expect(component.exerciseCreated.emit).toHaveBeenCalledWith(newExercise);
+      expect(createdSpy).toHaveBeenCalledWith(newExercise);
   }));
 
   it('should not submit if name or body part is missing', fakeAsync(() => {
@@ -129,14 +159,74 @@ describe('CreateExerciseComponent', () => {
     component.selectedBodyPartId = '1';
 
     exerciseService.createExercise.and.returnValue(throwError(() => new Error('Failed to create')));
-    spyOn(console, 'error');
-    spyOn(component.exerciseCreated, 'emit');
+      const consoleSpy = spyOn(console, 'error');
+      const createdSpy = spyOn(component.exerciseCreated, 'emit');
 
     component.onSubmit();
     tick();
 
     expect(exerciseService.createExercise).toHaveBeenCalled();
-    expect(component.exerciseCreated.emit).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalledWith('Error creating exercise:', jasmine.any(Error));
+      expect(createdSpy).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Error creating exercise:', jasmine.any(Error));
   }));
+  });
+
+  describe('Edit Mode', () => {
+    beforeEach(() => {
+    component.exerciseToEdit = mockExercise;
+    component.ngOnInit();
+    });
+
+    it('should update exercise and emit event on successful submit', fakeAsync(() => {
+      const updatedExercise: Exercise = {
+        ...mockExercise,
+        name: 'Updated Exercise',
+        description: 'Updated Description'
+      };
+
+      component.exercise.name = 'Updated Exercise';
+      component.exercise.description = 'Updated Description';
+      component.selectedBodyPartId = '1';
+
+      exerciseService.updateExercise.and.returnValue(of(updatedExercise));
+      const updatedSpy = spyOn(component.exerciseUpdated, 'emit');
+
+      component.onSubmit();
+      tick();
+
+      expect(exerciseService.updateExercise).toHaveBeenCalledWith(
+        mockExercise.id!,
+        {
+          name: 'Updated Exercise',
+          description: 'Updated Description',
+          fk_bodyPart: '1'
+        }
+      );
+      expect(updatedSpy).toHaveBeenCalledWith(updatedExercise);
+    }));
+
+    it('should handle error when updating exercise fails', fakeAsync(() => {
+      component.exercise.name = 'Updated Exercise';
+      component.selectedBodyPartId = '1';
+
+      exerciseService.updateExercise.and.returnValue(throwError(() => new Error('Failed to update')));
+      const consoleSpy = spyOn(console, 'error');
+      const updatedSpy = spyOn(component.exerciseUpdated, 'emit');
+
+      component.onSubmit();
+      tick();
+
+      expect(exerciseService.updateExercise).toHaveBeenCalled();
+      expect(updatedSpy).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Error updating exercise:', jasmine.any(Error));
+    }));
+  });
+
+  describe('Common Actions', () => {
+    it('should emit cancel event when onCancel is called', () => {
+      const cancelSpy = spyOn(component.cancel, 'emit');
+      component.onCancel();
+      expect(cancelSpy).toHaveBeenCalled();
+    });
+  });
 }); 

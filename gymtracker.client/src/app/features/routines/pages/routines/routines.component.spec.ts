@@ -1,160 +1,166 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RoutinesComponent } from './routines.component';
 import { RoutineService } from '../../services/routine.service';
-import { Routine } from '../../models/routine.model';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { CreateRoutineComponent } from '../../components/create-routine/create-routine.component';
-import { EditRoutineComponent } from '../../components/edit-routine/edit-routine.component';
 import { of, throwError } from 'rxjs';
+import { Routine } from '../../models/routine.model';
+import { CreateRoutineComponent } from '../../components/create-edit-routine/create-edit-routine.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('RoutinesComponent', () => {
   let component: RoutinesComponent;
   let fixture: ComponentFixture<RoutinesComponent>;
   let routineService: jasmine.SpyObj<RoutineService>;
+  let router: Router;
 
-  const mockRoutines: Routine[] = [
-    {
-      id: '1',
-      name: 'Push Day',
-      description: 'Chest, shoulders, and triceps',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isDeleted: false
-    },
-    {
-      id: '2',
-      name: 'Pull Day',
-      description: 'Back and biceps',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isDeleted: false
-    }
-  ];
+  const mockRoutine: Routine = {
+    id: '1',
+    name: 'Test Routine',
+    description: 'Test Description',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isDeleted: false
+  };
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('RoutineService', ['getRoutines', 'deleteRoutine']);
-    spy.getRoutines.and.returnValue(of(mockRoutines));
-    spy.deleteRoutine.and.returnValue(of(void 0));
+    const routineServiceSpy = jasmine.createSpyObj('RoutineService', ['getRoutines', 'deleteRoutine']);
+    routineServiceSpy.getRoutines.and.returnValue(of([mockRoutine]));
 
     await TestBed.configureTestingModule({
       imports: [
-        CommonModule,
-        RouterModule,
+        RoutinesComponent,
         CreateRoutineComponent,
-        EditRoutineComponent
+        RouterTestingModule
       ],
       providers: [
-        { provide: RoutineService, useValue: spy }
+        { provide: RoutineService, useValue: routineServiceSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: () => null
+              }
+            }
+          }
+        }
       ]
     }).compileComponents();
 
     routineService = TestBed.inject(RoutineService) as jasmine.SpyObj<RoutineService>;
-  });
-
-  beforeEach(() => {
+    router = TestBed.inject(Router);
     fixture = TestBed.createComponent(RoutinesComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with empty routines array and modals closed', () => {
-    expect(component.routines).toEqual([]);
-    expect(component.showCreateModal).toBeFalse();
-    expect(component.showEditModal).toBeFalse();
+  describe('Initialization', () => {
+    it('should load routines on init', () => {
+      expect(routineService.getRoutines).toHaveBeenCalled();
+      expect(component.routines).toEqual([mockRoutine]);
+    });
+
+    it('should handle error when loading routines fails', () => {
+      const error = new Error('Failed to load routines');
+      routineService.getRoutines.and.returnValue(throwError(() => error));
+      const consoleSpy = spyOn(console, 'error');
+
+      component.ngOnInit();
+
+      expect(routineService.getRoutines).toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Error loading routines:', error);
+    });
   });
 
-  it('should load routines on init', fakeAsync(() => {
-    component.ngOnInit();
-    tick();
+  describe('Routine Management', () => {
+    beforeEach(() => {
+      component.routines = [mockRoutine];
+    });
 
-    expect(routineService.getRoutines).toHaveBeenCalled();
-    expect(component.routines).toEqual(mockRoutines);
-  }));
+    it('should open create modal', () => {
+      component.openCreateModal();
 
-  it('should handle error when loading routines fails', fakeAsync(() => {
-    const consoleErrorSpy = spyOn(console, 'error');
-    routineService.getRoutines.and.returnValue(throwError(() => new Error('Failed to load')));
-    
-    component.ngOnInit();
-    tick();
+      expect(component.showCreateModal).toBeTrue();
+      expect(component.routineToEdit).toBeUndefined();
+    });
 
-    expect(routineService.getRoutines).toHaveBeenCalled();
-    expect(component.routines).toEqual([]);
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading routines:', jasmine.any(Error));
-  }));
+    it('should open edit modal', () => {
+      component.openEditModal(mockRoutine);
 
-  it('should prepare routine for editing', () => {
-    const routineToEdit = mockRoutines[0];
-    component.editRoutine(routineToEdit);
+      expect(component.showCreateModal).toBeTrue();
+      expect(component.routineToEdit).toEqual(mockRoutine);
+    });
 
-    expect(component.selectedRoutine).toEqual(routineToEdit);
-    expect(component.showEditModal).toBeTrue();
+    it('should delete routine', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      routineService.deleteRoutine.and.returnValue(of(undefined));
+
+      component.deleteRoutine(mockRoutine.id);
+
+      expect(routineService.deleteRoutine).toHaveBeenCalledWith(mockRoutine.id);
+      expect(component.routines).toEqual([]);
+    });
+
+    it('should not delete routine if user cancels', () => {
+      spyOn(window, 'confirm').and.returnValue(false);
+
+      component.deleteRoutine(mockRoutine.id);
+
+      expect(routineService.deleteRoutine).not.toHaveBeenCalled();
+      expect(component.routines).toEqual([mockRoutine]);
+    });
+
+    it('should handle error when deleting routine fails', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      const error = new Error('Failed to delete routine');
+      routineService.deleteRoutine.and.returnValue(throwError(() => error));
+      const consoleSpy = spyOn(console, 'error');
+
+      component.deleteRoutine(mockRoutine.id);
+
+      expect(routineService.deleteRoutine).toHaveBeenCalledWith(mockRoutine.id);
+      expect(consoleSpy).toHaveBeenCalledWith('Error deleting routine:', error);
+      expect(component.routines).toEqual([mockRoutine]);
+    });
   });
 
-  it('should delete routine after confirmation', fakeAsync(() => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    component.routines = [...mockRoutines];
-    const routineToDelete = mockRoutines[0];
+  describe('Modal Events', () => {
+    beforeEach(() => {
+      component.routines = [];
+    });
 
-    component.deleteRoutine(routineToDelete.id);
-    tick();
+    it('should handle routine created event', () => {
+      const newRoutine = { ...mockRoutine, id: '2' };
 
-    expect(routineService.deleteRoutine).toHaveBeenCalledWith(routineToDelete.id);
-    expect(component.routines).not.toContain(routineToDelete);
-  }));
+      component.onRoutineCreated(newRoutine);
 
-  it('should not delete routine if not confirmed', fakeAsync(() => {
-    spyOn(window, 'confirm').and.returnValue(false);
-    component.routines = [...mockRoutines];
-    const routineToDelete = mockRoutines[0];
+      expect(component.routines).toEqual([newRoutine]);
+      expect(component.showCreateModal).toBeFalse();
+    });
 
-    component.deleteRoutine(routineToDelete.id);
-    tick();
+    it('should handle routine updated event', () => {
+      const existingRoutine = { ...mockRoutine, name: 'Old Name' };
+      const updatedRoutine = { ...mockRoutine, name: 'New Name' };
+      component.routines = [existingRoutine];
 
-    expect(routineService.deleteRoutine).not.toHaveBeenCalled();
-    expect(component.routines).toContain(routineToDelete);
-  }));
+      component.onRoutineUpdated(updatedRoutine);
 
-  it('should handle error when deleting routine fails', fakeAsync(() => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    const consoleErrorSpy = spyOn(console, 'error');
-    routineService.deleteRoutine.and.returnValue(throwError(() => new Error('Failed to delete')));
-    
-    component.routines = [...mockRoutines];
-    const routineToDelete = mockRoutines[0];
-    const originalRoutines = [...component.routines];
+      expect(component.routines).toEqual([updatedRoutine]);
+      expect(component.showCreateModal).toBeFalse();
+    });
 
-    component.deleteRoutine(routineToDelete.id);
-    tick();
+    it('should handle modal closed event', () => {
+      component.showCreateModal = true;
+      component.routineToEdit = mockRoutine;
 
-    expect(routineService.deleteRoutine).toHaveBeenCalledWith(routineToDelete.id);
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Error deleting routine:', jasmine.any(Error));
-    expect(component.routines).toEqual(originalRoutines);
-  }));
+      component.onModalClosed();
 
-  it('should close create modal and reload routines when routine is created', fakeAsync(() => {
-    component.showCreateModal = true;
-    const loadRoutinesSpy = spyOn(component, 'loadRoutines');
-
-    component.onRoutineCreated();
-    tick();
-
-    expect(component.showCreateModal).toBeFalse();
-    expect(loadRoutinesSpy).toHaveBeenCalled();
-  }));
-
-  it('should close edit modal and reload routines when routine is updated', fakeAsync(() => {
-    component.showEditModal = true;
-    const loadRoutinesSpy = spyOn(component, 'loadRoutines');
-
-    component.onRoutineUpdated();
-    tick();
-
-    expect(component.showEditModal).toBeFalse();
-    expect(loadRoutinesSpy).toHaveBeenCalled();
-  }));
+      expect(component.showCreateModal).toBeFalse();
+      expect(component.routineToEdit).toBeUndefined();
+    });
+  });
 }); 

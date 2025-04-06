@@ -118,7 +118,7 @@ namespace GymTracker.Server.Tests.Controllers
         public async Task CreateExercise_WithValidData_ReturnsCreatedResult()
         {
             // Arrange
-            var exerciseDto = new ExerciseDto { name = "New Exercise", description = "Description", fk_bodypart = Guid.NewGuid() };
+            var exerciseDto = new ExerciseDto { name = "New Exercise", description = "Description", fk_bodyPart = Guid.NewGuid() };
             var createdExercise = new ExerciseResponseDto { id = Guid.NewGuid(), name = exerciseDto.name };
             _mockExerciseManager.Setup(m => m.CreateExerciseAsync(exerciseDto)).ReturnsAsync(createdExercise);
 
@@ -150,7 +150,7 @@ namespace GymTracker.Server.Tests.Controllers
         {
             // Arrange
             var exerciseId = Guid.NewGuid();
-            var exerciseDto = new ExerciseDto { name = "Updated Exercise", description = "Updated Description", fk_bodypart = Guid.NewGuid() };
+            var exerciseDto = new ExerciseDto { name = "Updated Exercise", description = "Updated Description", fk_bodyPart = Guid.NewGuid() };
             var updatedExercise = new ExerciseResponseDto { id = exerciseId, name = exerciseDto.name };
             _mockExerciseManager.Setup(m => m.UpdateExerciseAsync(exerciseId, exerciseDto)).ReturnsAsync(updatedExercise);
 
@@ -183,7 +183,7 @@ namespace GymTracker.Server.Tests.Controllers
         {
             // Arrange
             var exerciseId = Guid.NewGuid();
-            var exerciseDto = new ExerciseDto { name = "Updated Exercise", description = "Updated Description", fk_bodypart = Guid.NewGuid() };
+            var exerciseDto = new ExerciseDto { name = "Updated Exercise", description = "Updated Description", fk_bodyPart = Guid.NewGuid() };
             _mockExerciseManager.Setup(m => m.UpdateExerciseAsync(exerciseId, exerciseDto))
                 .ThrowsAsync(new KeyNotFoundException($"Exercise with ID {exerciseId} not found"));
 

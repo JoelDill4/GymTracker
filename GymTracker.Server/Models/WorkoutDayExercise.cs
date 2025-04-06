@@ -1,28 +1,25 @@
+using GymTracker.Server.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-/*
-public class WorkoutDayExercise
+namespace GymTracker.Server.Models
 {
-    public WorkoutDayExercise() { }
-
-    public WorkoutDayExercise(WorkoutDay workoutDay, Exercise exercise)
+    public class WorkoutDayExercise
     {
-        fk_workoutday = workoutDay.Id;
-        fk_exercise = exercise.Id;
-        WorkoutDay = workoutDay;
-        Exercise = exercise;
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid id { get; set; }
+
+        [Required]
+        public Guid fk_exercise { get; set; }
+
+        [ForeignKey("fk_exercise")]
+        public virtual Exercise exercise { get; set; }
+
+        [Required]
+        public Guid fk_workoutDay { get; set; }
+
+        [ForeignKey("fk_workoutDay")]
+        public virtual WorkoutDay workoutDay { get; set; }
     }
-
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; } 
-
-    /*public Guid fk_workoutday { get; set; }
-    [ForeignKey("fk_workoutday")]
-    public WorkoutDay WorkoutDay { get; set; }
-
-    public Guid fk_exercise { get; set; }
-    [ForeignKey("fk_exercise")]
-    public Exercise Exercise { get; set; }
-}*/
+}

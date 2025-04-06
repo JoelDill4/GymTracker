@@ -85,16 +85,16 @@ namespace GymTracker.Server.Services
 
         public async Task<ExerciseResponseDto> CreateExerciseAsync([FromBody] ExerciseDto exerciseDto)
         {
-            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodypart);
+            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodyPart);
             if (bodyPart == null)
-                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodypart} not found");
+                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodyPart} not found");
 
             var exercise = new Exercise
             {
                 id = Guid.NewGuid(),
                 name = exerciseDto.name,
                 description = exerciseDto.description,
-                fk_bodypart = exerciseDto.fk_bodypart,
+                fk_bodyPart = exerciseDto.fk_bodyPart,
                 createdAt = DateTime.UtcNow
             };
 
@@ -112,13 +112,13 @@ namespace GymTracker.Server.Services
             if (exercise == null)
                 throw new KeyNotFoundException($"Exercise with ID {id} not found");
 
-            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodypart);
+            var bodyPart = await _context.BodyPart.FindAsync(exerciseDto.fk_bodyPart);
             if (bodyPart == null)
-                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodypart} not found");
+                throw new KeyNotFoundException($"Body part with ID {exerciseDto.fk_bodyPart} not found");
 
             exercise.name = exerciseDto.name;
             exercise.description = exerciseDto.description;
-            exercise.fk_bodypart = exerciseDto.fk_bodypart;
+            exercise.fk_bodyPart = exerciseDto.fk_bodyPart;
             exercise.updatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -143,7 +143,7 @@ namespace GymTracker.Server.Services
         {
             var exercises = await _context.Exercise
                 .Include(e => e.bodyPart)
-                .Where(e => !e.isDeleted && e.fk_bodypart == bodyPartId)
+                .Where(e => !e.isDeleted && e.fk_bodyPart == bodyPartId)
                 .ToListAsync();
 
             return exercises.Select(e => new ExerciseResponseDto

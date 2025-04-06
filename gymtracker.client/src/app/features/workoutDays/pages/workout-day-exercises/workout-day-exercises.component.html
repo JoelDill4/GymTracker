@@ -1,0 +1,72 @@
+<div class="container mt-4" *ngIf="workoutDay">
+  <div class="row">
+    <div class="col-12">
+      <h2>{{ workoutDay.name }} - Exercises</h2>
+      <p *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3>Add Exercise</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <select class="form-select" [(ngModel)]="selectedExerciseId">
+                <option [ngValue]="null">Select an exercise</option>
+                <option *ngFor="let exercise of availableExercises" [value]="exercise.id">
+                  {{ exercise.name }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-primary" (click)="onAddExercise()" [disabled]="!selectedExerciseId">
+                Add Exercise
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3>Current Exercises</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let exercise of exercises">
+                  <td>{{ exercise.name }}</td>
+                  <td>{{ exercise.description }}</td>
+                  <td>
+                    <button class="btn btn-danger btn-sm" (click)="onRemoveExercise(exercise.id)">
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="exercises.length === 0">
+                  <td colspan="3" class="text-center">No exercises added yet</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

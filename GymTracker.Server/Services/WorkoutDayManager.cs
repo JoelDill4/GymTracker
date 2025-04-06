@@ -69,7 +69,7 @@ namespace GymTracker.Server.Services
         public async Task<IEnumerable<WorkoutDayResponseDto>> GetWorkoutDaysByRoutineAsync(Guid routineId)
         {
             return await _context.WorkoutDay
-                .Where(wd => !wd.isDeleted && wd.routineId == routineId)
+                .Where(wd => !wd.isDeleted && wd.fk_routine == routineId)
                 .Include(wd => wd.routine)
                 .Select(wd => new WorkoutDayResponseDto
                 {
@@ -95,7 +95,7 @@ namespace GymTracker.Server.Services
             {
                 id = Guid.NewGuid(),
                 name = workoutDayDto.name,
-                routineId = workoutDayDto.routineId,
+                fk_routine = workoutDayDto.routineId,
                 createdAt = DateTime.UtcNow
             };
 
@@ -135,7 +135,7 @@ namespace GymTracker.Server.Services
 
             workoutDay.name = workoutDayDto.name;
             workoutDay.description = workoutDayDto.description;
-            workoutDay.routineId = workoutDayDto.routineId;
+            workoutDay.fk_routine = workoutDayDto.routineId;
             workoutDay.updatedAt = DateTime.UtcNow;
 
             /* Update exercises
@@ -175,6 +175,58 @@ namespace GymTracker.Server.Services
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<Exercise>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId)
+        {
+            var workoutDay = await _context.WorkoutDay
+                .Include(wd => wd.workoutDayExercises)
+                    .ThenInclude(wde => wde.exercise)
+                .FirstOrDefaultAsync(wd => wd.id == workoutDayId && !wd.isDeleted);
+
+            if (workoutDay == null)
+                throw new KeyNotFoundException($"Workout day with ID {workoutDayId} not found");
+
+            return workoutDay.workoutDayExercises
+                .Select(wde => wde.exercise)
+                .ToList();
+        }
+
+        public async Task AddExerciseToWorkoutDayAsync(Guid workoutDayId, Guid exerciseId)
+        {
+            var workoutDay = await _context.WorkoutDay
+                .FirstOrDefaultAsync(wd => wd.id == workoutDayId && !wd.isDeleted);
+
+            if (workoutDay == null)
+                throw new KeyNotFoundException($"Workout day with ID {workoutDayId} not found");
+
+            var exercise = await _context.Exercise
+                .FirstOrDefaultAsync(e => e.id == exerciseId && !e.isDeleted);
+
+            if (exercise == null)
+                throw new KeyNotFoundException($"Exercise with ID {exerciseId} not found");
+
+            var workoutDayExercise = new WorkoutDayExercise
+            {
+                id = Guid.NewGuid(),
+                fk_workoutDay = workoutDayId,
+                fk_exercise = exerciseId
+            };
+
+            _context.WorkoutDayExercise.Add(workoutDayExercise);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveExerciseFromWorkoutDayAsync(Guid workoutDayId, Guid exerciseId)
+        {
+            var workoutDayExercise = await _context.WorkoutDayExercise
+                .FirstOrDefaultAsync(wde => wde.fk_workoutDay == workoutDayId && wde.fk_exercise == exerciseId);
+
+            if (workoutDayExercise == null)
+                throw new KeyNotFoundException($"Exercise with ID {exerciseId} not found in workout day with ID {workoutDayId}");
+
+            _context.WorkoutDayExercise.Remove(workoutDayExercise);
+            await _context.SaveChangesAsync();
         }
     }
 }

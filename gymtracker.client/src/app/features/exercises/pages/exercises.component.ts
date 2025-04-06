@@ -6,173 +6,14 @@ import { Exercise } from '../models/exercise.model';
 import { ExerciseService } from '../services/exercise.service';
 import { BodyPartService } from '../../bodyParts/services/body-part.service';
 import { BodyPart } from '../../bodyParts/models/body-part.model';
-import { CreateExerciseComponent } from '../components/create-exercise/create-exercise.component';
+import { CreateExerciseComponent } from '../components/create-edit-exercise/create-edit-exercise.component'
 
 @Component({
   selector: 'app-exercises',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, CreateExerciseComponent],
-  template: `
-    <div class="container fade-in">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-5 fw-bold">
-          <i class="bi bi-list-check me-2"></i>Exercises
-        </h1>
-        <button class="btn btn-primary" (click)="onCreateExercise()">
-          <i class="bi bi-plus-lg me-2"></i>Create Exercise
-        </button>
-      </div>
-
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white">
-              <i class="bi bi-search"></i>
-            </span>
-            <input 
-              type="text" 
-              class="form-control" 
-              placeholder="Search exercises..." 
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="onSearch()"
-              (keyup.enter)="onSearch()">
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button" 
-              (click)="onSearch()">
-              Search
-            </button>
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button" 
-              (click)="clearSearch()"
-              *ngIf="searchTerm">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white">
-              <i class="bi bi-person-arms-up"></i>
-            </span>
-            <select 
-              class="form-select" 
-              [(ngModel)]="selectedBodyPartId"
-              (ngModelChange)="onBodyPartChange()">
-              <option [ngValue]="null">All Body Parts</option>
-              <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">
-                {{ bodyPart.name }}
-              </option>
-            </select>
-            <button 
-              class="btn btn-outline-secondary" 
-              type="button" 
-              (click)="clearBodyPartFilter()"
-              *ngIf="selectedBodyPartId">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="loading" class="text-center py-5">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-
-      <div *ngIf="error" class="alert alert-danger">
-        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
-      </div>
-
-      <div *ngIf="!loading && !error">
-        <div *ngIf="exercises.length === 0" class="alert alert-info">
-          <i class="bi bi-info-circle me-2"></i>No exercises found. Click the Create Exercise button to add one.
-        </div>
-          
-        <div class="row g-4">
-          <div *ngFor="let exercise of exercises" class="col-md-6 col-lg-4">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">
-                  <i class="bi bi-dumbbell me-2"></i>{{ exercise.name }}
-                </h5>
-                <p class="card-text text-muted">{{ exercise.description }}</p>
-                <div class="d-flex align-items-center mt-3">
-                  <span class="badge bg-primary">
-                    <i class="bi bi-person-arms-up me-1"></i>{{ exercise.bodyPart.name }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <app-create-exercise
-      *ngIf="showCreateModal"
-      (cancel)="onCancelCreate()"
-      (exerciseCreated)="onExerciseCreated($event)">
-    </app-create-exercise>
-  `,
-  styles: [`
-    h1 {
-      color: var(--primary-color);
-    }
-
-    .card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .badge {
-      font-size: 0.9rem;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-    }
-
-    .alert {
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-    }
-
-    .spinner-border {
-      width: 3rem;
-      height: 3rem;
-    }
-
-    .input-group {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .input-group-text {
-      border-right: none;
-    }
-
-    .form-control, .form-select {
-      border-left: none;
-    }
-
-    .form-control:focus, .form-select:focus {
-      border-color: var(--border-color);
-      box-shadow: none;
-    }
-
-    .btn-outline-secondary {
-      border-color: var(--border-color);
-    }
-
-    .btn-outline-secondary:hover {
-      background-color: var(--border-color);
-      color: var(--text-color);
-    }
-  `]
+  templateUrl: './exercises.component.html',
+  styleUrl: './exercises.component.css'
 })
 export class ExercisesComponent implements OnInit, AfterViewInit {
   exercises: Exercise[] = [];
@@ -182,6 +23,7 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
   showCreateModal = false;
   searchTerm = '';
   selectedBodyPartId: string | null = null;
+  selectedExercise: Exercise | null = null;
 
   constructor(
     private exerciseService: ExerciseService,
@@ -290,10 +132,44 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
 
   onCancelCreate(): void {
     this.showCreateModal = false;
+    this.selectedExercise = null;
   }
 
   onExerciseCreated(exercise: Exercise): void {
     this.exercises.push(exercise);
     this.showCreateModal = false;
+  }
+
+  onEditExercise(exercise: Exercise): void {
+    this.selectedExercise = exercise;
+    this.showCreateModal = true;
+  }
+
+  onExerciseUpdated(updatedExercise: Exercise): void {
+    const index = this.exercises.findIndex(e => e.id === updatedExercise.id);
+    if (index !== -1) {
+      this.exercises[index] = updatedExercise;
+    }
+    this.showCreateModal = false;
+    this.selectedExercise = null;
+  }
+
+  onDeleteExercise(id: string): void {
+    if (confirm('Are you sure you want to delete this exercise?')) {
+      this.loading = true;
+      this.error = null;
+      this.exerciseService.deleteExercise(id).subscribe({
+        next: () => {
+          console.log('Exercise deleted successfully');
+          this.exercises = this.exercises.filter(e => e.id !== id);
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error deleting exercise:', error);
+          this.error = 'Failed to delete exercise';
+          this.loading = false;
+        }
+      });
+    }
   }
 } 

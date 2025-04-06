@@ -17,10 +17,12 @@ namespace GymTracker.Server.Models
         public string description { get; set; } = string.Empty;
 
         [Required]
-        public Guid fk_bodypart { get; set; }
+        public Guid fk_bodyPart { get; set; }
 
-        [ForeignKey("fk_bodypart")]
+        [ForeignKey("fk_bodyPart")]
         public BodyPart bodyPart { get; set; }
+
+        public virtual ICollection<WorkoutDayExercise> workoutDayExercises { get; set; } = new List<WorkoutDayExercise>();
 
         public DateTime createdAt { get; set; } = DateTime.UtcNow;
 

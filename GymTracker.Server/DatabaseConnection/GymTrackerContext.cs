@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using GymTracker.Server.Models;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace GymTracker.Server.DatabaseConnection
 {
@@ -11,12 +13,14 @@ namespace GymTracker.Server.DatabaseConnection
         }
 
         public DbSet<Exercise> Exercise { get; set; }
+
         public DbSet<BodyPart> BodyPart { get; set; }
+
         public DbSet<Routine> Routine { get; set; }
 
         public DbSet<WorkoutDay> WorkoutDay { get; set; }
 
-        // public DbSet<WorkoutDayExercise> WorkoutDayExercise { get; set; }
+        public DbSet<WorkoutDayExercise> WorkoutDayExercise { get; set; }
 
         // public DbSet<SubBodyPart> SubBodyPart { get; set; }
 
@@ -28,12 +32,37 @@ namespace GymTracker.Server.DatabaseConnection
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Exercise>()
-                .HasOne(e => e.bodyPart)
-                .WithMany()
-                .HasForeignKey("fk_bodypart");
+            var yamlPath = Path.Combine(AppContext.BaseDirectory, "Data", "body_parts.yaml");
+            if (!File.Exists(yamlPath))
+            {
+                throw new FileNotFoundException($"YAML file not found at path: {yamlPath}");
+            }
 
-            modelBuilder.Entity<Routine>();
+            var yamlContent = File.ReadAllText(yamlPath);
+            
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var bodyPartData = deserializer.Deserialize<BodyPartData>(yamlContent);
+
+            if (bodyPartData?.body_parts == null)
+            {
+                throw new InvalidOperationException("Failed to deserialize body parts from YAML file");
+            }
+
+            foreach (var bodyPart in bodyPartData.body_parts)
+            {
+                modelBuilder.Entity<BodyPart>().HasData(
+                    new BodyPart 
+                    { 
+                        id = Guid.Parse(bodyPart.id), 
+                        name = bodyPart.name, 
+                        createdAt = DateTime.UtcNow, 
+                        isDeleted = false 
+                    }
+                );
+            }
         }
     }
 }

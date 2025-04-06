@@ -3,7 +3,7 @@ import { ExercisesComponent } from './exercises.component';
 import { ExerciseService } from '../services/exercise.service';
 import { Exercise } from '../models/exercise.model';
 import { CommonModule } from '@angular/common';
-import { CreateExerciseComponent } from '../components/create-exercise/create-exercise.component';
+import { CreateExerciseComponent } from '../components/create-edit-exercise/create-edit-exercise.component';
 import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BodyPartService } from '../../bodyParts/services/body-part.service';
@@ -16,7 +16,7 @@ describe('ExercisesComponent', () => {
 
   const mockExercises: Exercise[] = [
     {
-      id: 1,
+      id: '1',
       name: 'Bench Press',
       description: 'Chest exercise',
       bodyPart: {
@@ -25,7 +25,7 @@ describe('ExercisesComponent', () => {
       }
     },
     {
-      id: 2,
+      id: '2',
       name: 'Squat',
       description: 'Leg exercise',
       bodyPart: {

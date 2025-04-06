@@ -12,6 +12,6 @@ namespace GymTracker.Server.Dtos.Exercise
         public string? description { get; set; }
 
         [Required]
-        public Guid fk_bodypart { get; set; }
+        public Guid fk_bodyPart { get; set; }
     }
 } 

@@ -11,4 +11,7 @@
     <None Remove="src\app\features\exercises\pages\exercises\**" />
     <TypeScriptConfiguration Remove="src\app\features\exercises\pages\exercises\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\app\features\workoutDays\pages\" />
+  </ItemGroup>
 </Project>

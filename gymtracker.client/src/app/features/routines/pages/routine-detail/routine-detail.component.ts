@@ -6,7 +6,7 @@ import { RoutineService } from '../../services/routine.service';
 import { WorkoutDay } from '../../../workoutDays/models/workoutday.model';
 import { Routine } from '../../models/routine.model';
 import { switchMap } from 'rxjs/operators';
-import { CreateWorkoutDayComponent } from '../../../workoutDays/components/create-workout-day/create-workout-day.component';
+import { CreateWorkoutDayComponent } from '../../../workoutDays/components/create-edit-workout-day/create-edit-workout-day.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -26,6 +26,7 @@ export class RoutineDetailComponent implements OnInit {
   loading = false;
   error: string | null = null;
   showCreateModal = false;
+  selectedWorkoutDay: WorkoutDay | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -67,16 +68,33 @@ export class RoutineDetailComponent implements OnInit {
   }
 
   onCreateWorkoutDay(): void {
+    this.selectedWorkoutDay = null;
+    this.showCreateModal = true;
+  }
+
+  onEditWorkoutDay(workoutDay: WorkoutDay): void {
+    this.selectedWorkoutDay = workoutDay;
     this.showCreateModal = true;
   }
 
   onCancelCreate(): void {
     this.showCreateModal = false;
+    this.selectedWorkoutDay = null;
   }
 
   onWorkoutDayCreated(workoutDay: WorkoutDay): void {
     this.workoutDays = [...this.workoutDays, workoutDay];
     this.showCreateModal = false;
+    this.selectedWorkoutDay = null;
+  }
+
+  onWorkoutDayUpdated(updatedWorkoutDay: WorkoutDay): void {
+    const index = this.workoutDays.findIndex(w => w.id === updatedWorkoutDay.id);
+    if (index !== -1) {
+      this.workoutDays[index] = updatedWorkoutDay;
+    }
+    this.showCreateModal = false;
+    this.selectedWorkoutDay = null;
   }
 
   deleteWorkoutDay(id: string): void {

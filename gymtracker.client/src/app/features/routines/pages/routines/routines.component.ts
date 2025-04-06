@@ -1,24 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { RoutineService } from '../../services/routine.service';
+import { CreateRoutineComponent } from '../../components/create-edit-routine/create-edit-routine.component';
 import { Routine } from '../../models/routine.model';
-import { CreateRoutineComponent } from '../../components/create-routine/create-routine.component';
-import { EditRoutineComponent } from '../../components/edit-routine/edit-routine.component';
+import { RoutineService } from '../../services/routine.service';
 
 @Component({
   selector: 'app-routines',
-  templateUrl: './routine.component.html',
-  styleUrl: './routine.component.css',
   standalone: true,
-  imports: [CommonModule, RouterModule, CreateRoutineComponent, EditRoutineComponent]
+  imports: [CommonModule, RouterModule, CreateRoutineComponent],
+  templateUrl: './routines.component.html',
+  styleUrls: ['./routines.component.css']
 })
-
 export class RoutinesComponent implements OnInit {
   routines: Routine[] = [];
   showCreateModal = false;
-  showEditModal = false;
-  selectedRoutine!: Routine;
+  routineToEdit?: Routine;
 
   constructor(private routineService: RoutineService) {}
 
@@ -37,9 +34,14 @@ export class RoutinesComponent implements OnInit {
     });
   }
 
-  editRoutine(routine: Routine): void {
-    this.selectedRoutine = { ...routine };
-    this.showEditModal = true;
+  openCreateModal(): void {
+    this.routineToEdit = undefined;
+    this.showCreateModal = true;
+  }
+
+  openEditModal(routine: Routine): void {
+    this.routineToEdit = routine;
+    this.showCreateModal = true;
   }
 
   deleteRoutine(id: string): void {
@@ -55,13 +57,21 @@ export class RoutinesComponent implements OnInit {
     }
   }
 
-  onRoutineCreated(): void {
+  onRoutineCreated(routine: Routine): void {
+    this.routines.push(routine);
     this.showCreateModal = false;
-    this.loadRoutines();
   }
 
-  onRoutineUpdated(): void {
-    this.showEditModal = false;
-    this.loadRoutines();
+  onRoutineUpdated(routine: Routine): void {
+    const index = this.routines.findIndex(r => r.id === routine.id);
+    if (index !== -1) {
+      this.routines[index] = routine;
+    }
+    this.showCreateModal = false;
+  }
+
+  onModalClosed(): void {
+    this.showCreateModal = false;
+    this.routineToEdit = undefined;
   }
 } 

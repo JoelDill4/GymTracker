@@ -7,7 +7,8 @@ namespace GymTracker.Server.Enums
         Shoulders = 2,
         Biceps = 3,
         Triceps = 4,
-        Legs = 5,
-        Core = 6
+        Forearms = 5,
+        Legs = 6,
+        Core = 7
     }
 } 

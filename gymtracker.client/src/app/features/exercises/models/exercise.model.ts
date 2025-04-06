@@ -4,7 +4,7 @@ export interface BodyPart {
 }
 
 export interface Exercise {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   bodyPart: {
@@ -16,5 +16,5 @@ export interface Exercise {
 export interface CreateExerciseDto {
   name: string;
   description?: string;
-  fk_bodypart: string;
+  fk_bodyPart: string;
 } 
