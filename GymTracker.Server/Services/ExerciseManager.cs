@@ -1,4 +1,5 @@
 ﻿using GymTracker.Server.DatabaseConnection;
+using GymTracker.Server.Dtos.BodyPart;
 using GymTracker.Server.Dtos.Exercise;
 using GymTracker.Server.Models;
 using Microsoft.AspNetCore.Mvc;

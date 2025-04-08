@@ -19,18 +19,16 @@ namespace GymTracker.Server.Dtos.WorkoutDay
         // public List<WorkoutDayExerciseResponseDto> Exercises { get; set; } = new();
     }
 
-    /*public class WorkoutDayExerciseResponseDto
+    public class WorkoutDayExerciseResponseDto
     {
-        public Guid Id { get; set; }
-        public Guid ExerciseId { get; set; }
-        public string ExerciseName { get; set; }
-        public int Sets { get; set; }
-        public int Reps { get; set; }
-        public decimal? Weight { get; set; }
-        public List<BodyPartDto> BodyParts { get; set; } = new();
+        public Guid id { get; set; }
+        public string name { get; set; }
+        public string? description { get; set; }
+        public Guid bodyPartId { get; set; }
+        public string bodyPartName { get; set; }
     }
 
-    public class BodyPartDto
+    /*public class BodyPartDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

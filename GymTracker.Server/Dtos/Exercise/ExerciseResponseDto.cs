@@ -1,3 +1,4 @@
+using GymTracker.Server.Dtos.BodyPart;
 using System.ComponentModel.DataAnnotations;
 
 namespace GymTracker.Server.Dtos.Exercise

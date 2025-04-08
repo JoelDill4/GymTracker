@@ -1,4 +1,4 @@
-using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Dtos.BodyPart;
 
 namespace GymTracker.Server.Services
 {

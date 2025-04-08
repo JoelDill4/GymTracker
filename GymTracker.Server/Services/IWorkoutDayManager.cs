@@ -55,7 +55,7 @@ namespace GymTracker.Server.Services
         /// </summary>
         /// <param name="workoutDayId">The ID of the workout day</param>
         /// <returns>A collection of exercises</returns>
-        Task<IEnumerable<Exercise>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
+        Task<IEnumerable<WorkoutDayExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
 
         /// <summary>
         /// Adds an exercise to a workout day

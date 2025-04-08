@@ -1,5 +1,5 @@
 using GymTracker.Server.DatabaseConnection;
-using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Dtos.BodyPart;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services

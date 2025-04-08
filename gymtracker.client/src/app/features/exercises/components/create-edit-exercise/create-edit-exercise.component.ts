@@ -5,12 +5,21 @@ import { Exercise, CreateExerciseDto } from '../../models/exercise.model';
 import { ExerciseService } from '../../services/exercise.service';
 import { BodyPartService } from '../../../bodyParts/services/body-part.service';
 import { BodyPart } from '../../../bodyParts/models/body-part.model';
+import { BaseModalComponent } from '../../../../shared/components/base-modal/base-modal.component';
+import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
+import { ModalFooterComponent } from '../../../../shared/components/modal-footer/modal-footer.component';
 import { of } from 'rxjs';
 
 @Component({
   selector: 'app-create-edit-exercise',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    BaseModalComponent,
+    FormFieldComponent,
+    ModalFooterComponent
+  ],
   templateUrl: './create-edit-exercise.component.html',
   styleUrl: './create-edit-exercise.component.css'
 })

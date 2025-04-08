@@ -13,17 +13,29 @@
           <h3>Add Exercise</h3>
         </div>
         <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label for="bodyPartSelect" class="form-label">Filter by Body Part</label>
+              <select id="bodyPartSelect" class="form-select" [(ngModel)]="selectedBodyPartId" (ngModelChange)="onBodyPartChange()">
+                <option [ngValue]="null">All Body Parts</option>
+                <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">
+                  {{ bodyPart.name }}
+                </option>
+              </select>
+            </div>
+          </div>
           <div class="row">
             <div class="col-md-8">
-              <select class="form-select" [(ngModel)]="selectedExerciseId">
+              <label for="exerciseSelect" class="form-label">Select Exercise</label>
+              <select id="exerciseSelect" class="form-select" [(ngModel)]="selectedExerciseId">
                 <option [ngValue]="null">Select an exercise</option>
-                <option *ngFor="let exercise of availableExercises" [value]="exercise.id">
+                <option *ngFor="let exercise of filteredExercises" [value]="exercise.id">
                   {{ exercise.name }}
                 </option>
               </select>
             </div>
-            <div class="col-md-4">
-              <button class="btn btn-primary" (click)="onAddExercise()" [disabled]="!selectedExerciseId">
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-primary w-100" (click)="onAddExercise()" [disabled]="!selectedExerciseId">
                 Add Exercise
               </button>
             </div>
@@ -46,6 +58,7 @@
                 <tr>
                   <th>Name</th>
                   <th>Description</th>
+                  <th>Body Part</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -53,6 +66,7 @@
                 <tr *ngFor="let exercise of exercises">
                   <td>{{ exercise.name }}</td>
                   <td>{{ exercise.description }}</td>
+                  <td>{{ exercise.bodyPartName }}</td>
                   <td>
                     <button class="btn btn-danger btn-sm" (click)="onRemoveExercise(exercise.id)">
                       Remove
@@ -60,7 +74,7 @@
                   </td>
                 </tr>
                 <tr *ngIf="exercises.length === 0">
-                  <td colspan="3" class="text-center">No exercises added yet</td>
+                  <td colspan="4" class="text-center">No exercises added yet</td>
                 </tr>
               </tbody>
             </table>

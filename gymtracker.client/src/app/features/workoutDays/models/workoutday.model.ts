@@ -9,6 +9,14 @@ export interface WorkoutDay {
     updatedAt?: Date;
 }
 
+export interface WorkoutDayExercise {
+    id: string;
+    name: string;
+    description?: string;
+    bodyPartId: string;
+    bodyPartName: string;
+}
+
 export interface CreateWorkoutDayDto {
     name: string;
     description?: string;

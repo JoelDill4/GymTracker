@@ -1,4 +1,4 @@
-using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Dtos.BodyPart;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;

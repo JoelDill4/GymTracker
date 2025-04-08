@@ -214,20 +214,34 @@ namespace GymTracker.Server.Tests.Controllers
         {
             // Arrange
             var workoutDayId = Guid.NewGuid();
-            var exercises = new List<Exercise>
+            var exercises = new List<WorkoutDayExerciseResponseDto>
             {
-                new Exercise { id = Guid.NewGuid(), name = "Bench Press" },
-                new Exercise { id = Guid.NewGuid(), name = "Squats" }
+                new WorkoutDayExerciseResponseDto 
+                { 
+                    id = Guid.NewGuid(),
+                    name = "Bench Press",
+                    description = "Chest exercise",
+                    bodyPartId = Guid.NewGuid(),
+                    bodyPartName = "Chest"
+                },
+                new WorkoutDayExerciseResponseDto 
+                { 
+                    id = Guid.NewGuid(),
+                    name = "Squats",
+                    description = "Leg exercise",
+                    bodyPartId = Guid.NewGuid(),
+                    bodyPartName = "Legs"
+                }
             };
             _mockWorkoutDayManager.Setup(m => m.GetExercisesFromWorkoutDayAsync(workoutDayId))
-                .ReturnsAsync((IEnumerable<Exercise>)exercises);
+                .ReturnsAsync(exercises);
 
             // Act
             var result = await _controller.GetExercisesFromWorkoutDay(workoutDayId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnedExercises = Assert.IsAssignableFrom<IEnumerable<Exercise>>(okResult.Value);
+            var returnedExercises = Assert.IsAssignableFrom<IEnumerable<WorkoutDayExerciseResponseDto>>(okResult.Value);
             Assert.Equal(2, returnedExercises.Count());
         }
 

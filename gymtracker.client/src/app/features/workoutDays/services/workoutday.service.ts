@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { WorkoutDay, CreateWorkoutDayDto } from '../models/workoutday.model';
+import { WorkoutDay, CreateWorkoutDayDto, WorkoutDayExercise } from '../models/workoutday.model';
 import { Exercise } from '../../exercises/models/exercise.model';
 
 @Injectable({
@@ -36,8 +36,8 @@ export class WorkoutDayService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  getExercisesFromWorkoutDay(workoutDayId: string): Observable<Exercise[]> {
-    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/${workoutDayId}`);
+  getExercisesFromWorkoutDay(workoutDayId: string): Observable<WorkoutDayExercise[]> {
+    return this.http.get<WorkoutDayExercise[]>(`${this.apiUrl}/exercises/${workoutDayId}`);
   }
 
   addExerciseToWorkoutDay(workoutDayId: string, exerciseId: string): Observable<void> {

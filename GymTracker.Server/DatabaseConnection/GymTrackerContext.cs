@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using GymTracker.Server.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using GymTracker.Server.Dtos.BodyPart;
 
 namespace GymTracker.Server.DatabaseConnection
 {
@@ -56,7 +57,7 @@ namespace GymTracker.Server.DatabaseConnection
                 modelBuilder.Entity<BodyPart>().HasData(
                     new BodyPart 
                     { 
-                        id = Guid.Parse(bodyPart.id), 
+                        id = bodyPart.id, 
                         name = bodyPart.name, 
                         createdAt = DateTime.UtcNow, 
                         isDeleted = false 
