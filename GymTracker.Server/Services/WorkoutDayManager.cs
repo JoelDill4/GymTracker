@@ -170,6 +170,73 @@ namespace GymTracker.Server.Services
                 .ToList();
         }
 
+        public async Task AssignExercisesToWorkoutDayAsync(Guid workoutDayId, List<Guid> exercisesIds)
+        {
+            var workoutDay = await _context.WorkoutDay
+                .Include(wd => wd.workoutDayExercises)
+                .FirstOrDefaultAsync(wd => wd.id == workoutDayId && !wd.isDeleted);
+
+            if (workoutDay == null)
+                throw new KeyNotFoundException($"Workout day with ID {workoutDayId} not found");
+
+            // Remove existing exercises that are not in the new list
+            var exercisesToRemove = workoutDay.workoutDayExercises
+                .Where(wde => !exercisesIds.Contains(wde.fk_exercise))
+                .ToList();
+
+            if (exercisesToRemove.Any())
+            {
+                _context.WorkoutDayExercise.RemoveRange(exercisesToRemove);
+            }
+
+            // Get existing exercise IDs to avoid duplicates
+            var existingExerciseIds = workoutDay.workoutDayExercises
+                .Select(wde => wde.fk_exercise)
+                .ToList();
+
+            // Only add exercises that don't already exist
+            var exerciseIdsToAdd = exercisesIds
+                .Where(id => !existingExerciseIds.Contains(id))
+                .ToList();
+
+            List<WorkoutDayExercise> workoutDayExercises = new List<WorkoutDayExercise>();
+            List<Guid> notFoundExercisesIds = new List<Guid>();
+
+            foreach (var exerciseId in exerciseIdsToAdd)
+            {
+                var exercise = await _context.Exercise
+                    .FirstOrDefaultAsync(e => e.id == exerciseId && !e.isDeleted);
+
+                if (exercise == null)
+                {
+                    notFoundExercisesIds.Add(exerciseId);
+                }
+                else
+                {
+                    var workoutDayExercise = new WorkoutDayExercise
+                    {
+                        id = Guid.NewGuid(),
+                        fk_workoutDay = workoutDayId,
+                        fk_exercise = exerciseId
+                    };
+
+                    workoutDayExercises.Add(workoutDayExercise);
+                }
+            }
+
+            if (notFoundExercisesIds.Any())
+            {
+                throw new KeyNotFoundException($"Exercises with IDs {string.Join(", ", notFoundExercisesIds)} not found");
+            }
+
+            if (workoutDayExercises.Any())
+            {
+                _context.WorkoutDayExercise.AddRange(workoutDayExercises);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddExerciseToWorkoutDayAsync(Guid workoutDayId, Guid exerciseId)
         {
             var workoutDay = await _context.WorkoutDay

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Exercise } from '../../../exercises/models/exercise.model';
 import { BodyPart } from '../../../bodyParts/models/body-part.model';
 import { BodyPartService } from '../../../bodyParts/services/body-part.service';
@@ -24,9 +24,11 @@ export class WorkoutDayExercisesComponent implements OnInit {
   selectedExerciseId: string | null = null;
   selectedBodyPartId: string | null = null;
   bodyParts: BodyPart[] = [];
+  @Output() cancel = new EventEmitter<void>();
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private workoutDayService: WorkoutDayService,
     private exerciseService: ExerciseService,
     private bodyPartService: BodyPartService
@@ -83,12 +85,10 @@ export class WorkoutDayExercisesComponent implements OnInit {
   private updateFilteredExercises(): void {
     let filtered = [...this.availableExercises];
     
-    // Filter out already added exercises
     filtered = filtered.filter(exercise => 
       !this.exercises.some(added => added.id === exercise.id)
     );
 
-    // Filter by selected body part
     if (this.selectedBodyPartId) {
       filtered = filtered.filter(exercise => 
         exercise.bodyPart.id === this.selectedBodyPartId
@@ -105,23 +105,43 @@ export class WorkoutDayExercisesComponent implements OnInit {
   onAddExercise(): void {
     if (!this.selectedExerciseId || !this.workoutDay) return;
 
-    this.workoutDayService.addExerciseToWorkoutDay(this.workoutDay.id, this.selectedExerciseId).subscribe(
-      () => {
-        this.loadExercises(this.workoutDay!.id);
-        this.selectedExerciseId = null;
-      },
-      error => console.error('Error adding exercise:', error)
-    );
+    const exercise = this.filteredExercises.find(e => e.id === this.selectedExerciseId);
+    if (exercise && exercise.id) {
+      this.exercises.push({
+        id: exercise.id,
+        name: exercise.name,
+        description: exercise.description,
+        bodyPartId: exercise.bodyPart.id,
+        bodyPartName: exercise.bodyPart.name
+      });
+      this.selectedExerciseId = null;
+      this.updateFilteredExercises();
+    }
   }
 
   onRemoveExercise(exerciseId: string): void {
-    if (!this.workoutDay || !exerciseId) return;
+    this.exercises = this.exercises.filter(e => e.id !== exerciseId);
+    this.updateFilteredExercises();
+  }
 
-    this.workoutDayService.removeExerciseFromWorkoutDay(this.workoutDay.id, exerciseId).subscribe(
+  onCancel(): void {
+    const routineId = this.workoutDay?.routine?.id;
+
+    this.router.navigate(['/routines', routineId]);
+  }
+
+  onSaveExercises(): void {
+    if (!this.workoutDay) return;
+
+    const exerciseIds = this.exercises.map(e => e.id).filter((id): id is string => id !== undefined);
+    this.workoutDayService.assignExercisesToWorkoutDay(this.workoutDay.id, exerciseIds).subscribe(
       () => {
-        this.loadExercises(this.workoutDay!.id);
+        const routineId = this.workoutDay?.routine?.id;
+        this.router.navigate(['/routines', routineId]);
       },
-      error => console.error('Error removing exercise:', error)
+      error => {
+        console.error('Error saving exercises:', error);
+      }
     );
   }
 } 

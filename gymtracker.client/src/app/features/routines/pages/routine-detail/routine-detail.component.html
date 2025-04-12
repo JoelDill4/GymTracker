@@ -28,18 +28,27 @@
     <div class="row g-4">
       <div *ngFor="let workoutDay of workoutDays" class="col-md-6 col-lg-4">
         <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">
-              <i class="bi bi-calendar-check me-2"></i>{{ workoutDay.name }}
-            </h5>
-            <p class="card-text text-muted" *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
-            <div class="mt-3">
-              <button class="btn btn-sm btn-outline-primary me-2" (click)="onEditWorkoutDay(workoutDay)">
-                <i class="bi bi-pencil me-1"></i>Edit
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteWorkoutDay(workoutDay.id)">
-                <i class="bi bi-trash me-1"></i>Delete
-              </button>
+          <div class="card-body d-flex flex-column">
+            <div>
+              <h5 class="card-title">
+                <i class="bi bi-calendar-check me-2"></i>{{ workoutDay.name }}
+              </h5>
+              <p class="card-text text-muted" *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
+            </div>
+            <div class="mt-auto">
+              <div class="mb-2">
+                <button class="btn btn-sm btn-outline-primary w-100" [routerLink]="['workout-days', workoutDay.id, 'exercises']">
+                  <i class="bi bi-pencil me-1"></i>Exercises
+                </button>
+              </div>
+              <div class="d-flex">
+                <button class="btn btn-sm btn-outline-primary me-2 flex-grow-1" (click)="onEditWorkoutDay(workoutDay)">
+                  <i class="bi bi-pencil me-1"></i>Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger flex-grow-1" (click)="deleteWorkoutDay(workoutDay.id)">
+                  <i class="bi bi-trash me-1"></i>Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -56,6 +65,3 @@
     (workoutDayUpdated)="onWorkoutDayUpdated($event)">
   </app-create-edit-workout-day>
 </div>
-
-<!-- TODO: Add CreateWorkoutDay modal component -->
-<!-- <app-create-edit-workout-day *ngIf="showCreateModal" [routineId]="routine?.id" (close)="showCreateModal = false" (created)="onWorkoutDayCreated($event)"></app-create-edit-workout-day> --> 

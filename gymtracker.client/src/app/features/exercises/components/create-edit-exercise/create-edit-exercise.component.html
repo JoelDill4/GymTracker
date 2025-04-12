@@ -16,13 +16,11 @@
         [(ngModel)]="exercise.name" 
         name="name" 
         required
-        minlength="3"
         maxlength="100"
         placeholder="Enter exercise name"
         #name="ngModel">
       <div error class="text-danger mt-1" *ngIf="name.invalid && (name.dirty || name.touched)">
         <small *ngIf="name.errors?.['required']">Name is required</small>
-        <small *ngIf="name.errors?.['minlength']">Name must be at least 3 characters</small>
         <small *ngIf="name.errors?.['maxlength']">Name cannot exceed 100 characters</small>
       </div>
     </app-form-field>
@@ -73,4 +71,3 @@
     </app-modal-footer>
   </form>
 </app-base-modal>
-<div class="modal-backdrop fade show"></div> 

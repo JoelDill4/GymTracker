@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WorkoutDay, CreateWorkoutDayDto } from '../../models/workoutday.model';
 import { WorkoutDayService } from '../../services/workoutday.service';
+import { BaseModalComponent } from '../../../../shared/components/base-modal/base-modal.component';
+import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
+import { ModalFooterComponent } from '../../../../shared/components/modal-footer/modal-footer.component';
 
 @Component({
   selector: 'app-create-edit-workout-day',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BaseModalComponent, FormFieldComponent, ModalFooterComponent],
   templateUrl: './create-edit-workout-day.component.html',
   styleUrl: './create-edit-workout-day.component.css'
 })

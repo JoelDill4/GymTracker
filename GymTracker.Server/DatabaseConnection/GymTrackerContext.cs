@@ -33,6 +33,10 @@ namespace GymTracker.Server.DatabaseConnection
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<WorkoutDayExercise>()
+                    .HasIndex(w => new { w.fk_workoutDay, w.fk_exercise })
+                    .IsUnique();
+
             var yamlPath = Path.Combine(AppContext.BaseDirectory, "Data", "body_parts.yaml");
             if (!File.Exists(yamlPath))
             {
@@ -58,8 +62,8 @@ namespace GymTracker.Server.DatabaseConnection
                     new BodyPart 
                     { 
                         id = bodyPart.id, 
-                        name = bodyPart.name, 
-                        createdAt = DateTime.UtcNow, 
+                        name = bodyPart.name,
+                        createdAt = new DateTime(2024, 01, 01),
                         isDeleted = false 
                     }
                 );

@@ -8,8 +8,7 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist\gymtracker.client\browser\</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="src\app\features\exercises\pages\exercises\**" />
-    <TypeScriptConfiguration Remove="src\app\features\exercises\pages\exercises\**" />
+    <None Remove="src\app\features\workoutDays\pages\workout-day-exercises\ho04g4nl.3kq~" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\app\features\workoutDays\pages\" />

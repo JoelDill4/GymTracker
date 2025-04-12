@@ -137,7 +137,7 @@ describe('CreateRoutineComponent', () => {
 
     it('should emit close event when cancel button is clicked', () => {
       const closeSpy = spyOn(component.close, 'emit');
-      const cancelButton = fixture.nativeElement.querySelector('.btn-secondary');
+      const cancelButton = fixture.nativeElement.querySelector('.btn-outline-secondary');
       
       cancelButton.click();
       

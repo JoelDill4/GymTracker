@@ -1,14 +1,13 @@
-import { Component, EventEmitter, Output, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Exercise, CreateExerciseDto } from '../../models/exercise.model';
-import { ExerciseService } from '../../services/exercise.service';
-import { BodyPartService } from '../../../bodyParts/services/body-part.service';
-import { BodyPart } from '../../../bodyParts/models/body-part.model';
 import { BaseModalComponent } from '../../../../shared/components/base-modal/base-modal.component';
 import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
 import { ModalFooterComponent } from '../../../../shared/components/modal-footer/modal-footer.component';
-import { of } from 'rxjs';
+import { BodyPart } from '../../../bodyParts/models/body-part.model';
+import { BodyPartService } from '../../../bodyParts/services/body-part.service';
+import { CreateExerciseDto, Exercise } from '../../models/exercise.model';
+import { ExerciseService } from '../../services/exercise.service';
 
 @Component({
   selector: 'app-create-edit-exercise',
@@ -20,8 +19,7 @@ import { of } from 'rxjs';
     FormFieldComponent,
     ModalFooterComponent
   ],
-  templateUrl: './create-edit-exercise.component.html',
-  styleUrl: './create-edit-exercise.component.css'
+  templateUrl: './create-edit-exercise.component.html'
 })
 export class CreateExerciseComponent implements OnInit {
   @Input() exerciseToEdit: Exercise | null = null;

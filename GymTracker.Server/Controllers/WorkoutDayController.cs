@@ -144,6 +144,34 @@ namespace GymTracker.Server.Controllers
         }
 
         /// <summary>
+        /// Sets the exercises of a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exercisesIds">The list of exercise IDs that will be part of the workout day</param>
+        /// <returns>No content if successful</returns>
+        [HttpPost("exercises/{workoutDayId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AssignExercisesOfWorkoutDay(Guid workoutDayId, [FromBody] List<Guid> exercisesIds)
+        {
+            try
+            {
+                await _workoutDayManager.AssignExercisesToWorkoutDayAsync(workoutDayId, exercisesIds);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning exercises to workout day");
+                return StatusCode(500, "An error occurred while assigning the exercises to the workout day");
+            }
+        }
+
+        /// <summary>
         /// Gets all exercises from a workout day
         /// </summary>
         /// <param name="workoutDayId">The ID of the workout day</param>

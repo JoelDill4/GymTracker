@@ -58,6 +58,14 @@ namespace GymTracker.Server.Services
         Task<IEnumerable<WorkoutDayExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
 
         /// <summary>
+        /// Assign exercises to a workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <param name="exercisesIds">The list of exercise IDs to add</param>
+        /// <returns>Task</returns>
+        Task AssignExercisesToWorkoutDayAsync(Guid workoutDayId, List<Guid> exercisesIds);
+
+        /// <summary>
         /// Adds an exercise to a workout day
         /// </summary>
         /// <param name="workoutDayId">The ID of the workout day</param>

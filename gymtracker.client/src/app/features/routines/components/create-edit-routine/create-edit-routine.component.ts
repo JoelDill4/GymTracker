@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Routine } from '../../models/routine.model';
 import { RoutineService } from '../../services/routine.service';
+import { ModalFooterComponent } from '../../../../shared/components/modal-footer/modal-footer.component';
+import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
+import { BaseModalComponent } from '../../../../shared/components/base-modal/base-modal.component';
 
 @Component({
   selector: 'app-create-edit-routine',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './create-edit-routine.component.html',
-  styleUrls: ['./create-edit-routine.component.css']
+  imports: [CommonModule, FormsModule, ModalFooterComponent, FormFieldComponent, BaseModalComponent],
+  templateUrl: './create-edit-routine.component.html'
 })
 export class CreateRoutineComponent implements OnInit {
   @Input() routineToEdit?: Routine;

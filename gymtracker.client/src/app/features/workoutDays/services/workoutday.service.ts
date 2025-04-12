@@ -41,7 +41,11 @@ export class WorkoutDayService {
   }
 
   addExerciseToWorkoutDay(workoutDayId: string, exerciseId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/exercises/${workoutDayId}/${exerciseId}`, {});
+    return this.http.post<void>(`${this.apiUrl}/exercises/${workoutDayId}/${exerciseId}`, null);
+  }
+
+  assignExercisesToWorkoutDay(workoutDayId: string, exerciseIds: string[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/exercises/${workoutDayId}`, exerciseIds);
   }
 
   removeExerciseFromWorkoutDay(workoutDayId: string, exerciseId: string): Observable<void> {
