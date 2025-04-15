@@ -10,7 +10,7 @@ namespace GymTracker.Server.Models
         public Guid id { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 3)]
+        [StringLength(100)]
         public string name { get; set; }
 
         [StringLength(500)]
@@ -25,7 +25,9 @@ namespace GymTracker.Server.Models
         public virtual ICollection<WorkoutDayExercise> workoutDayExercises { get; set; } = new List<WorkoutDayExercise>();
 
         public DateTime createdAt { get; set; } = DateTime.UtcNow;
+
         public DateTime? updatedAt { get; set; }
+
         public bool isDeleted { get; set; } = false;
     }
 }

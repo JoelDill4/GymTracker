@@ -1,4 +1,5 @@
 using GymTracker.Server.Dtos.WorkoutDay;
+using GymTracker.Server.Dtos.WorkoutDayExercise;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
@@ -124,23 +125,29 @@ namespace GymTracker.Server.Controllers
         }
 
         /// <summary>
-        /// Deletes a workout day
+        /// Gets all exercises from a workout day
         /// </summary>
-        /// <param name="id">The ID of the workout day to delete</param>
-        /// <returns>No content if successful</returns>
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <returns>A collection of exercises</returns>
+        [HttpGet("exercises/{workoutDayId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteWorkoutDay(Guid id)
+        public async Task<ActionResult<IEnumerable<WorkoutDayExerciseResponseDto>>> GetExercisesFromWorkoutDay(Guid workoutDayId)
         {
-            var deleted = await _workoutDayManager.DeleteWorkoutDayAsync(id);
-            
-            if (!deleted)
+            try
             {
-                return NotFound($"Workout day with ID {id} not found");
+                var exercises = await _workoutDayManager.GetExercisesFromWorkoutDayAsync(workoutDayId);
+                return Ok(exercises);
             }
-
-            return NoContent();
+            catch (KeyNotFoundException)
+            {
+                return NotFound($"Workout day with ID {workoutDayId} not found");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting exercises from workout day");
+                return StatusCode(500, "An error occurred while getting exercises from the workout day");
+            }
         }
 
         /// <summary>
@@ -168,32 +175,6 @@ namespace GymTracker.Server.Controllers
             {
                 _logger.LogError(ex, "Error assigning exercises to workout day");
                 return StatusCode(500, "An error occurred while assigning the exercises to the workout day");
-            }
-        }
-
-        /// <summary>
-        /// Gets all exercises from a workout day
-        /// </summary>
-        /// <param name="workoutDayId">The ID of the workout day</param>
-        /// <returns>A collection of exercises</returns>
-        [HttpGet("exercises/{workoutDayId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<WorkoutDayExerciseResponseDto>>> GetExercisesFromWorkoutDay(Guid workoutDayId)
-        {
-            try
-            {
-                var exercises = await _workoutDayManager.GetExercisesFromWorkoutDayAsync(workoutDayId);
-                return Ok(exercises);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound($"Workout day with ID {workoutDayId} not found");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting exercises from workout day");
-                return StatusCode(500, "An error occurred while getting exercises from the workout day");
             }
         }
 
@@ -250,6 +231,26 @@ namespace GymTracker.Server.Controllers
                 _logger.LogError(ex, "Error removing exercise from workout day");
                 return StatusCode(500, "An error occurred while removing the exercise from the workout day");
             }
+        }
+
+        /// <summary>
+        /// Deletes a workout day
+        /// </summary>
+        /// <param name="id">The ID of the workout day to delete</param>
+        /// <returns>No content if successful</returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteWorkoutDay(Guid id)
+        {
+            var deleted = await _workoutDayManager.DeleteWorkoutDayAsync(id);
+            
+            if (!deleted)
+            {
+                return NotFound($"Workout day with ID {id} not found");
+            }
+
+            return NoContent();
         }
     }
 }

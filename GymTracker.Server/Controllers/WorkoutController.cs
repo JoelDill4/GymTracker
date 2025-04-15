@@ -155,6 +155,7 @@ namespace GymTracker.Server.Controllers
             _workoutManager.RemoveExerciseExecutionFromWorkout(workoutId, exerciseId);
 
             return Ok("The exercise execution has been removed from the workout");
-        }*/
+        }
+        */
     }
 }

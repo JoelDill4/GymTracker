@@ -16,35 +16,34 @@ namespace GymTracker.Server.Services
 
         /*public async Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsAsync()
         {
-            return await _context.Workouts
-                .Where(w => !w.IsDeleted)
-                .Include(w => w.WorkoutDay)
-                    .ThenInclude(wd => wd.Routine)
-                .Include(w => w.ExerciseExecutions)
-                    .ThenInclude(ee => ee.Exercise)
+            return await _context.Workout
+                .Where(w => !w.isDeleted)
+                .Include(w => w.workoutDay)
+                    .ThenInclude(wd => wd.routine)
+                .Include(w => w.exerciseSets)
+                    .ThenInclude(ee => ee.exercise)
                 .Select(w => new WorkoutResponseDto
                 {
-                    Id = w.Id,
-                    Date = w.Date,
-                    Observations = w.Observations,
-                    CreatedAt = w.CreatedAt,
-                    UpdatedAt = w.UpdatedAt,
+                    Id = w.id,
+                    Date = w.workoutDate,
+                    Observations = w.observations,
+                    CreatedAt = w.createdAt,
+                    UpdatedAt = w.updatedAt,
                     WorkoutDay = new WorkoutDayDto
                     {
-                        Id = w.WorkoutDay.Id,
-                        Name = w.WorkoutDay.Name,
-                        RoutineId = w.WorkoutDay.RoutineId,
-                        RoutineName = w.WorkoutDay.Routine.Name
+                        Id = w.fk_workoutDay,
+                        Name = w.workoutDay.name,
+                        RoutineId = w.workoutDay.fk_routine,
+                        RoutineName = w.workoutDay.routine.name
                     },
-                    ExerciseExecutions = w.ExerciseExecutions
+                    ExerciseExecutions = w.exerciseSets
                         .Select(ee => new ExerciseExecutionDto
                         {
-                            Id = ee.Id,
-                            ExerciseName = ee.Exercise.Name,
-                            Sets = ee.Sets,
-                            Reps = ee.Reps,
-                            Weight = ee.Weight,
-                            Notes = ee.Notes
+                            Id = ee.id,
+                            ExerciseName = ee.exercise.name,
+                            Reps = ee.reps,
+                            Weight = ee.weight,
+                            Notes = ee.obs
                         })
                         .ToList()
                 })
@@ -53,12 +52,12 @@ namespace GymTracker.Server.Services
 
         public async Task<WorkoutResponseDto?> GetWorkoutAsync(Guid id)
         {
-            var workout = await _context.Workouts
-                .Include(w => w.WorkoutDay)
-                    .ThenInclude(wd => wd.Routine)
-                .Include(w => w.ExerciseExecutions)
-                    .ThenInclude(ee => ee.Exercise)
-                .FirstOrDefaultAsync(w => w.Id == id && !w.IsDeleted);
+            var workout = await _context.Workout
+                .Include(w => w.workoutDay)
+                    .ThenInclude(wd => wd.routine)
+                .Include(w => w.exerciseSets)
+                    .ThenInclude(ee => ee.exercise)
+                .FirstOrDefaultAsync(w => w.id == id && !w.isDeleted);
 
             if (workout == null)
                 return null;

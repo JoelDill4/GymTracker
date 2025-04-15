@@ -24,8 +24,8 @@ import { ExerciseService } from '../../services/exercise.service';
 export class CreateExerciseComponent implements OnInit {
   @Input() exerciseToEdit: Exercise | null = null;
   @Output() cancel = new EventEmitter<void>();
-  @Output() exerciseCreated = new EventEmitter<Exercise>();
-  @Output() exerciseUpdated = new EventEmitter<Exercise>();
+  @Output() created = new EventEmitter<Exercise>();
+  @Output() updated = new EventEmitter<Exercise>();
 
   exercise: Exercise = {
     name: '',
@@ -39,6 +39,8 @@ export class CreateExerciseComponent implements OnInit {
   bodyParts: BodyPart[] = [];
   selectedBodyPartId: string = '';
   isEditing = false;
+  loading = false;
+  error = '';
 
   constructor(
     private exerciseService: ExerciseService,
@@ -59,43 +61,60 @@ export class CreateExerciseComponent implements OnInit {
       next: (parts) => {
         this.bodyParts = parts;
       },
-      error: (error) => {
-        console.error('Error loading body parts:', error);
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load body parts';
       }
     });
   }
 
-  onCancel(): void {
-    this.cancel.emit();
+  onSubmit(): void {
+    if (!this.exercise.name) {
+      this.error = 'Name is required';
+      return;
+    }
+
+    if (!this.selectedBodyPartId) {
+      this.error = 'Body part is required';
+      return;
+    }
+
+    const exerciseData: CreateExerciseDto = {
+      name: this.exercise.name,
+      description: this.exercise.description,
+      fk_bodyPart: this.selectedBodyPartId
+    };
+
+    this.loading = true;
+    this.error = '';
+
+    if (this.isEditing && this.exerciseToEdit?.id) {
+      this.exerciseService.updateExercise(this.exerciseToEdit.id, exerciseData).subscribe({
+        next: (updatedExercise) => {
+          this.loading = false;
+          this.updated.emit(updatedExercise);
+          this.cancel.emit();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'Failed to update exercise';
+        }
+      });
+    } else {
+      this.exerciseService.createExercise(exerciseData).subscribe({
+        next: (createdExercise) => {
+          this.loading = false;
+          this.created.emit(createdExercise);
+          this.cancel.emit();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'Failed to create exercise';
+        }
+      });
+    }
   }
 
-  onSubmit(): void {
-    if (this.exercise.name && this.selectedBodyPartId) {
-      const exerciseData: CreateExerciseDto = {
-        name: this.exercise.name,
-        description: this.exercise.description,
-        fk_bodyPart: this.selectedBodyPartId
-      };
-
-      if (this.isEditing && this.exerciseToEdit?.id) {
-        this.exerciseService.updateExercise(this.exerciseToEdit.id, exerciseData).subscribe({
-          next: (updatedExercise) => {
-            this.exerciseUpdated.emit(updatedExercise);
-          },
-          error: (error) => {
-            console.error('Error updating exercise:', error);
-          }
-        });
-      } else {
-        this.exerciseService.createExercise(exerciseData).subscribe({
-          next: (createdExercise) => {
-            this.exerciseCreated.emit(createdExercise);
-          },
-          error: (error) => {
-            console.error('Error creating exercise:', error);
-          }
-        });
-      }
-    }
+  onCancel(): void {
+    this.cancel.emit();
   }
 } 

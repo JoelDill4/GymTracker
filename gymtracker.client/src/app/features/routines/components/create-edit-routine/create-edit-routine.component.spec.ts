@@ -38,8 +38,8 @@ describe('CreateRoutineComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Creation Mode', () => {
-    it('should initialize with empty routine', () => {
+  describe('Initialization', () => {
+    it('should initialize with empty routine in create mode', () => {
       expect(component.routine).toEqual({
         id: '',
         name: '',
@@ -49,13 +49,44 @@ describe('CreateRoutineComponent', () => {
         isDeleted: false
       });
       expect(component.isEditing).toBeFalse();
+      expect(component.loading).toBeFalse();
+      expect(component.error).toBe('');
     });
 
-    it('should create routine and emit created event', fakeAsync(() => {
+    it('should initialize with provided routine in edit mode', () => {
+      component.routineToEdit = mockRoutine;
+      component.ngOnInit();
+      
+      expect(component.routine).toEqual(mockRoutine);
+      expect(component.isEditing).toBeTrue();
+      expect(component.loading).toBeFalse();
+      expect(component.error).toBe('');
+    });
+  });
+
+  describe('Form Validation', () => {
+    it('should not submit if name is empty', fakeAsync(() => {
+      component.routine.name = '';
+      component.routine.description = 'Test Description';
+      const createdSpy = spyOn(component.created, 'emit');
+      const cancelSpy = spyOn(component.cancel, 'emit');
+      
+      component.onSubmit();
+      tick();
+      
+      expect(createdSpy).not.toHaveBeenCalled();
+      expect(cancelSpy).not.toHaveBeenCalled();
+      expect(routineService.createRoutine).not.toHaveBeenCalled();
+      expect(component.error).toBe('Name is required');
+    }));
+  });
+
+  describe('Create Mode', () => {
+    it('should create routine and emit created event on successful submit', fakeAsync(() => {
       const newRoutine = { ...mockRoutine, id: '2' };
       routineService.createRoutine.and.returnValue(of(newRoutine));
       const createdSpy = spyOn(component.created, 'emit');
-      const closeSpy = spyOn(component.close, 'emit');
+      const cancelSpy = spyOn(component.cancel, 'emit');
 
       component.routine.name = 'New Routine';
       component.routine.description = 'New Description';
@@ -64,13 +95,15 @@ describe('CreateRoutineComponent', () => {
 
       expect(routineService.createRoutine).toHaveBeenCalledWith(component.routine);
       expect(createdSpy).toHaveBeenCalledWith(newRoutine);
-      expect(closeSpy).toHaveBeenCalled();
+      expect(cancelSpy).toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
+      expect(component.error).toBe('');
     }));
 
-    it('should handle creation error', fakeAsync(() => {
+    it('should handle error when creating routine fails', fakeAsync(() => {
       routineService.createRoutine.and.returnValue(throwError(() => new Error('Creation failed')));
       const createdSpy = spyOn(component.created, 'emit');
-      const closeSpy = spyOn(component.close, 'emit');
+      const cancelSpy = spyOn(component.cancel, 'emit');
 
       component.routine.name = 'New Routine';
       component.onSubmit();
@@ -78,7 +111,8 @@ describe('CreateRoutineComponent', () => {
 
       expect(routineService.createRoutine).toHaveBeenCalledWith(component.routine);
       expect(createdSpy).not.toHaveBeenCalled();
-      expect(closeSpy).not.toHaveBeenCalled();
+      expect(cancelSpy).not.toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
       expect(component.error).toBe('Failed to create routine');
     }));
   });
@@ -89,16 +123,11 @@ describe('CreateRoutineComponent', () => {
       component.ngOnInit();
     });
 
-    it('should initialize with routine to edit', () => {
-      expect(component.routine).toEqual(mockRoutine);
-      expect(component.isEditing).toBeTrue();
-    });
-
-    it('should update routine and emit updated event', fakeAsync(() => {
+    it('should update routine and emit updated event on successful submit', fakeAsync(() => {
       const updatedRoutine = { ...mockRoutine, name: 'Updated Routine' };
       routineService.updateRoutine.and.returnValue(of(updatedRoutine));
       const updatedSpy = spyOn(component.updated, 'emit');
-      const closeSpy = spyOn(component.close, 'emit');
+      const cancelSpy = spyOn(component.cancel, 'emit');
 
       component.routine.name = 'Updated Routine';
       component.onSubmit();
@@ -106,13 +135,15 @@ describe('CreateRoutineComponent', () => {
 
       expect(routineService.updateRoutine).toHaveBeenCalledWith(mockRoutine.id, component.routine);
       expect(updatedSpy).toHaveBeenCalledWith(updatedRoutine);
-      expect(closeSpy).toHaveBeenCalled();
+      expect(cancelSpy).toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
+      expect(component.error).toBe('');
     }));
 
-    it('should handle update error', fakeAsync(() => {
+    it('should handle error when updating routine fails', fakeAsync(() => {
       routineService.updateRoutine.and.returnValue(throwError(() => new Error('Update failed')));
       const updatedSpy = spyOn(component.updated, 'emit');
-      const closeSpy = spyOn(component.close, 'emit');
+      const cancelSpy = spyOn(component.cancel, 'emit');
 
       component.routine.name = 'Updated Routine';
       component.onSubmit();
@@ -120,28 +151,29 @@ describe('CreateRoutineComponent', () => {
 
       expect(routineService.updateRoutine).toHaveBeenCalledWith(mockRoutine.id, component.routine);
       expect(updatedSpy).not.toHaveBeenCalled();
-      expect(closeSpy).not.toHaveBeenCalled();
+      expect(cancelSpy).not.toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
       expect(component.error).toBe('Failed to update routine');
     }));
   });
 
   describe('Modal Actions', () => {
-    it('should emit close event when close button is clicked', () => {
-      const closeSpy = spyOn(component.close, 'emit');
+    it('should emit cancel event when close button is clicked', () => {
+      const cancelSpy = spyOn(component.cancel, 'emit');
       const closeButton = fixture.nativeElement.querySelector('.btn-close');
       
       closeButton.click();
       
-      expect(closeSpy).toHaveBeenCalled();
+      expect(cancelSpy).toHaveBeenCalled();
     });
 
-    it('should emit close event when cancel button is clicked', () => {
-      const closeSpy = spyOn(component.close, 'emit');
+    it('should emit cancel event when cancel button is clicked', () => {
+      const cancelSpy = spyOn(component.cancel, 'emit');
       const cancelButton = fixture.nativeElement.querySelector('.btn-outline-secondary');
       
       cancelButton.click();
       
-      expect(closeSpy).toHaveBeenCalled();
+      expect(cancelSpy).toHaveBeenCalled();
     });
   });
 }); 

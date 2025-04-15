@@ -1,4 +1,5 @@
 ﻿using GymTracker.Server.Dtos.WorkoutDay;
+using GymTracker.Server.Dtos.WorkoutDayExercise;
 using GymTracker.Server.Models;
 
 namespace GymTracker.Server.Services

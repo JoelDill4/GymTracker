@@ -12,10 +12,6 @@ namespace GymTracker.Server.Services
     {
         private readonly GymTrackerContext _context;
 
-        /// <summary>
-        /// Initializes a new instance of RoutineManager
-        /// </summary>
-        /// <param name="context">The database context for routine operations</param>
         public RoutineManager(GymTrackerContext context)
         {
             _context = context;

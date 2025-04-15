@@ -6,13 +6,19 @@ namespace GymTracker.Server.Services
 {
     public interface IWorkoutManager
     {
-        /*public List<Workout> GetWorkouts();
+        /*Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsAsync();
 
-        public Workout? GetWorkout(Guid id);
+        Task<WorkoutResponseDto?> GetWorkoutAsync(Guid id);
 
-        public Workout CreateOrEditWorkout(WorkoutDto workout);
+        Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsByDateRangeAsync(DateTime startDate, DateTime endDate);
 
-        public void DeleteWorkout(Guid id);
+        Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsByWorkoutDayAsync(Guid workoutDayId);
+
+        Task<WorkoutResponseDto> CreateWorkoutAsync(WorkoutDto workoutDto);
+
+        Task<WorkoutResponseDto> UpdateWorkoutAsync(Guid id, WorkoutDto workoutDto);
+
+        Task DeleteWorkoutAsync(Guid id);
 
         public List<Exercise> GetExercisesFromWorkout(Guid workoutId);
 
@@ -24,14 +30,6 @@ namespace GymTracker.Server.Services
 
         public void AddExerciseExecutionToWorkout(Guid workoutId, ExerciseExecutionDto exercise);
 
-        public void RemoveExerciseExecutionFromWorkout(Guid workoutId, Guid exerciseId);
-
-        Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsAsync();
-        Task<WorkoutResponseDto?> GetWorkoutAsync(Guid id);
-        Task<WorkoutResponseDto> CreateWorkoutAsync(WorkoutDto workoutDto);
-        Task<WorkoutResponseDto> UpdateWorkoutAsync(Guid id, WorkoutDto workoutDto);
-        Task<bool> DeleteWorkoutAsync(Guid id);
-        Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsByDateRangeAsync(DateTime startDate, DateTime endDate);
-        Task<IEnumerable<WorkoutResponseDto>> GetWorkoutsByWorkoutDayAsync(Guid workoutDayId);*/
+        public void RemoveExerciseExecutionFromWorkout(Guid workoutId, Guid exerciseId);*/
     }
 }

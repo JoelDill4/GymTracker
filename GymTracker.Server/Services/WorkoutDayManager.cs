@@ -1,12 +1,16 @@
 ﻿using GymTracker.Server.DatabaseConnection;
-using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Dtos.BodyPart;
 using GymTracker.Server.Dtos.Routine;
 using GymTracker.Server.Dtos.WorkoutDay;
+using GymTracker.Server.Dtos.WorkoutDayExercise;
 using GymTracker.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services
 {
+    /// <summary>
+    /// Implementation of IWorkoutDayManager for managing workoutdays
+    /// </summary>
     public class WorkoutDayManager : IWorkoutDayManager
     {
         private readonly GymTrackerContext _context;
@@ -16,6 +20,7 @@ namespace GymTracker.Server.Services
             _context = context;
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<WorkoutDayResponseDto>> GetWorkoutDaysAsync()
         {
             return await _context.WorkoutDay
@@ -40,6 +45,7 @@ namespace GymTracker.Server.Services
                 .ToListAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<WorkoutDayResponseDto?> GetWorkoutDayAsync(Guid id)
         {
             var workoutDay = await _context.WorkoutDay
@@ -67,6 +73,7 @@ namespace GymTracker.Server.Services
             };
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<WorkoutDayResponseDto>> GetWorkoutDaysByRoutineAsync(Guid routineId)
         {
             return await _context.WorkoutDay
@@ -91,6 +98,7 @@ namespace GymTracker.Server.Services
                 .ToListAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<WorkoutDayResponseDto> CreateWorkoutDayAsync(WorkoutDayDto workoutDayDto)
         {
             var routine = await _context.Routine
@@ -114,6 +122,7 @@ namespace GymTracker.Server.Services
             return await GetWorkoutDayAsync(workoutDay.id) ?? throw new Exception("Failed to create workout day");
         }
 
+        /// <inheritdoc/>
         public async Task<WorkoutDayResponseDto> UpdateWorkoutDayAsync(Guid id, WorkoutDayDto workoutDayDto)
         {
             var workoutDay = await _context.WorkoutDay
@@ -132,6 +141,7 @@ namespace GymTracker.Server.Services
             return await GetWorkoutDayAsync(workoutDay.id) ?? throw new Exception("Failed to update workout day");
         }
 
+        /// <inheritdoc/>
         public async Task<bool> DeleteWorkoutDayAsync(Guid id)
         {
             var workoutDay = await _context.WorkoutDay
@@ -147,6 +157,7 @@ namespace GymTracker.Server.Services
             return true;
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<WorkoutDayExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId)
         {
             var workoutDay = await _context.WorkoutDay
@@ -164,12 +175,16 @@ namespace GymTracker.Server.Services
                     id = wde.exercise.id,
                     name = wde.exercise.name,
                     description = wde.exercise.description,
-                    bodyPartId = wde.exercise.fk_bodyPart,
-                    bodyPartName = wde.exercise.bodyPart.name
+                    bodyPartDto = new BodyPartDto
+                    {
+                        id = wde.exercise.fk_bodyPart,
+                        name = wde.exercise.bodyPart.name
+                    }
                 })
                 .ToList();
         }
 
+        /// <inheritdoc/>
         public async Task AssignExercisesToWorkoutDayAsync(Guid workoutDayId, List<Guid> exercisesIds)
         {
             var workoutDay = await _context.WorkoutDay
@@ -237,6 +252,7 @@ namespace GymTracker.Server.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <inheritdoc/>
         public async Task AddExerciseToWorkoutDayAsync(Guid workoutDayId, Guid exerciseId)
         {
             var workoutDay = await _context.WorkoutDay
@@ -262,6 +278,7 @@ namespace GymTracker.Server.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <inheritdoc/>
         public async Task RemoveExerciseFromWorkoutDayAsync(Guid workoutDayId, Guid exerciseId)
         {
             var workoutDayExercise = await _context.WorkoutDayExercise

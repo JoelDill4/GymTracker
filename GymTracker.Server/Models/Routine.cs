@@ -7,10 +7,11 @@ namespace GymTracker.Server.Models
     public class Routine
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid id { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 3)]
+        [StringLength(100)]
         public string name { get; set; }
 
         [StringLength(500)]

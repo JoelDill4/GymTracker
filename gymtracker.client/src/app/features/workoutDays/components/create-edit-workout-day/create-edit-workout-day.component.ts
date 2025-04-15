@@ -11,15 +11,14 @@ import { ModalFooterComponent } from '../../../../shared/components/modal-footer
   selector: 'app-create-edit-workout-day',
   standalone: true,
   imports: [CommonModule, FormsModule, BaseModalComponent, FormFieldComponent, ModalFooterComponent],
-  templateUrl: './create-edit-workout-day.component.html',
-  styleUrl: './create-edit-workout-day.component.css'
+  templateUrl: './create-edit-workout-day.component.html'
 })
 export class CreateWorkoutDayComponent implements OnInit {
   @Input() routineId!: string;
   @Input() workoutDayToEdit: WorkoutDay | null = null;
   @Output() cancel = new EventEmitter<void>();
-  @Output() workoutDayCreated = new EventEmitter<WorkoutDay>();
-  @Output() workoutDayUpdated = new EventEmitter<WorkoutDay>();
+  @Output() created = new EventEmitter<WorkoutDay>();
+  @Output() updated = new EventEmitter<WorkoutDay>();
 
   workoutDay: CreateWorkoutDayDto = {
     name: '',
@@ -28,7 +27,7 @@ export class CreateWorkoutDayComponent implements OnInit {
   };
 
   loading = false;
-  error: string | null = null;
+  error = '';
   isEditing = false;
 
   constructor(private workoutDayService: WorkoutDayService) {}
@@ -46,35 +45,43 @@ export class CreateWorkoutDayComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.workoutDay.name && this.workoutDay.routineId) {
-      this.loading = true;
-      this.error = null;
+    if (!this.workoutDay.name) {
+      this.error = 'Name is required';
+      return;
+    }
 
-      if (this.isEditing && this.workoutDayToEdit) {
-        this.workoutDayService.updateWorkoutDay(this.workoutDayToEdit.id, this.workoutDay).subscribe({
-          next: (updatedWorkoutDay) => {
-            this.workoutDayUpdated.emit(updatedWorkoutDay);
-            this.loading = false;
-          },
-          error: (error) => {
-            console.error('Error updating workout day:', error);
-            this.error = 'Failed to update workout day';
-            this.loading = false;
-          }
-        });
-      } else {
-        this.workoutDayService.createWorkoutDay(this.workoutDay).subscribe({
-          next: (createdWorkoutDay) => {
-            this.workoutDayCreated.emit(createdWorkoutDay);
-            this.loading = false;
-          },
-          error: (error) => {
-            console.error('Error creating workout day:', error);
-            this.error = 'Failed to create workout day';
-            this.loading = false;
-          }
-        });
-      }
+    if (!this.workoutDay.routineId) {
+      this.error = 'Routine ID is required';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    if (this.isEditing && this.workoutDayToEdit) {
+      this.workoutDayService.updateWorkoutDay(this.workoutDayToEdit.id, this.workoutDay).subscribe({
+        next: (updatedWorkoutDay) => {
+          this.loading = false;
+          this.updated.emit(updatedWorkoutDay);
+          this.cancel.emit();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'Failed to update workout day';
+        }
+      });
+    } else {
+      this.workoutDayService.createWorkoutDay(this.workoutDay).subscribe({
+        next: (createdWorkoutDay) => {
+          this.loading = false;
+          this.created.emit(createdWorkoutDay);
+          this.cancel.emit();
+        },
+        error: (err) => {
+          this.loading = false;
+          this.error = err.error?.message || 'Failed to create workout day';
+        }
+      });
     }
   }
 

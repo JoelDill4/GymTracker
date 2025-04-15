@@ -15,7 +15,7 @@ import { BaseModalComponent } from '../../../../shared/components/base-modal/bas
 })
 export class CreateRoutineComponent implements OnInit {
   @Input() routineToEdit?: Routine;
-  @Output() close = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
   @Output() created = new EventEmitter<Routine>();
   @Output() updated = new EventEmitter<Routine>();
 
@@ -41,6 +41,11 @@ export class CreateRoutineComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (!this.routine.name) {
+      this.error = 'Name is required';
+      return;
+    }
+
     if (this.isEditing) {
       this.updateRoutine();
     } else {
@@ -55,7 +60,7 @@ export class CreateRoutineComponent implements OnInit {
       next: (routine) => {
         this.loading = false;
         this.created.emit(routine);
-        this.close.emit();
+        this.cancel.emit();
       },
       error: (err) => {
         this.loading = false;
@@ -71,7 +76,7 @@ export class CreateRoutineComponent implements OnInit {
       next: (routine) => {
         this.loading = false;
         this.updated.emit(routine);
-        this.close.emit();
+        this.cancel.emit();
       },
       error: (err) => {
         this.loading = false;
@@ -81,6 +86,6 @@ export class CreateRoutineComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.close.emit();
+    this.cancel.emit();
   }
 } 

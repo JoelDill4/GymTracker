@@ -102,6 +102,6 @@
 <app-create-edit-exercise *ngIf="showCreateModal"
                      [exerciseToEdit]="selectedExercise"
                      (cancel)="onCancelCreate()"
-                     (exerciseCreated)="onExerciseCreated($event)"
-                     (exerciseUpdated)="onExerciseUpdated($event)">
+                     (created)="onExerciseCreated($event)"
+                     (updated)="onExerciseUpdated($event)">
 </app-create-edit-exercise>

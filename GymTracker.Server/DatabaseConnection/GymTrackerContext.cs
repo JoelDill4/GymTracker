@@ -23,11 +23,9 @@ namespace GymTracker.Server.DatabaseConnection
 
         public DbSet<WorkoutDayExercise> WorkoutDayExercise { get; set; }
 
-        // public DbSet<SubBodyPart> SubBodyPart { get; set; }
+        public DbSet<Workout> Workout { get; set; }
 
-        // public DbSet<Workout> Workout { get; set; }
-
-        // public DbSet<ExerciseExecution> ExerciseExecution { get; set; }
+        public DbSet<ExerciseSet> ExerciseExecution { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

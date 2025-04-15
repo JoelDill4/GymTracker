@@ -61,7 +61,7 @@
     [routineId]="routine.id"
     [workoutDayToEdit]="selectedWorkoutDay"
     (cancel)="onCancelCreate()"
-    (workoutDayCreated)="onWorkoutDayCreated($event)"
-    (workoutDayUpdated)="onWorkoutDayUpdated($event)">
+    (created)="onWorkoutDayCreated($event)"
+    (updated)="onWorkoutDayUpdated($event)">
   </app-create-edit-workout-day>
 </div>

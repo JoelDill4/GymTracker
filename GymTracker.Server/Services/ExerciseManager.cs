@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymTracker.Server.Services
 {
+    /// <summary>
+    /// Implementation of IExerciseManager for managing exercises
+    /// </summary>
     public class ExerciseManager : IExerciseManager
     {
         private readonly GymTrackerContext _context;

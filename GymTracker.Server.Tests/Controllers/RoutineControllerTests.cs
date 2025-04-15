@@ -25,44 +25,6 @@ namespace GymTracker.Server.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetWorkoutDaysByRoutine_ReturnsOkResult_WithWorkoutDays()
-        {
-            // Arrange
-            var routineId = Guid.NewGuid();
-            var workoutDays = new List<WorkoutDayResponseDto>
-            {
-                new WorkoutDayResponseDto { id = Guid.NewGuid(), name = "Day 1", description = "First day" },
-                new WorkoutDayResponseDto { id = Guid.NewGuid(), name = "Day 2", description = "Second day" }
-            };
-            _mockWorkoutDayManager.Setup(m => m.GetWorkoutDaysByRoutineAsync(routineId)).ReturnsAsync(workoutDays);
-
-            // Act
-            var result = await _controller.GetWorkoutDaysByRoutine(routineId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnedWorkoutDays = Assert.IsAssignableFrom<IEnumerable<WorkoutDayResponseDto>>(okResult.Value);
-            Assert.Equal(2, returnedWorkoutDays.Count());
-        }
-
-        [Fact]
-        public async Task GetWorkoutDaysByRoutine_WithNonExistentRoutine_ReturnsEmptyList()
-        {
-            // Arrange
-            var routineId = Guid.NewGuid();
-            var emptyList = new List<WorkoutDayResponseDto>();
-            _mockWorkoutDayManager.Setup(m => m.GetWorkoutDaysByRoutineAsync(routineId)).ReturnsAsync(emptyList);
-
-            // Act
-            var result = await _controller.GetWorkoutDaysByRoutine(routineId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnedWorkoutDays = Assert.IsAssignableFrom<IEnumerable<WorkoutDayResponseDto>>(okResult.Value);
-            Assert.Empty(returnedWorkoutDays);
-        }
-
-        [Fact]
         public async Task GetRoutines_ReturnsOkResult_WithRoutines()
         {
             // Arrange
@@ -112,6 +74,44 @@ namespace GymTracker.Server.Tests.Controllers
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetWorkoutDaysByRoutine_ReturnsOkResult_WithWorkoutDays()
+        {
+            // Arrange
+            var routineId = Guid.NewGuid();
+            var workoutDays = new List<WorkoutDayResponseDto>
+            {
+                new WorkoutDayResponseDto { id = Guid.NewGuid(), name = "Day 1", description = "First day" },
+                new WorkoutDayResponseDto { id = Guid.NewGuid(), name = "Day 2", description = "Second day" }
+            };
+            _mockWorkoutDayManager.Setup(m => m.GetWorkoutDaysByRoutineAsync(routineId)).ReturnsAsync(workoutDays);
+
+            // Act
+            var result = await _controller.GetWorkoutDaysByRoutine(routineId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnedWorkoutDays = Assert.IsAssignableFrom<IEnumerable<WorkoutDayResponseDto>>(okResult.Value);
+            Assert.Equal(2, returnedWorkoutDays.Count());
+        }
+
+        [Fact]
+        public async Task GetWorkoutDaysByRoutine_WithNonExistentRoutine_ReturnsEmptyList()
+        {
+            // Arrange
+            var routineId = Guid.NewGuid();
+            var emptyList = new List<WorkoutDayResponseDto>();
+            _mockWorkoutDayManager.Setup(m => m.GetWorkoutDaysByRoutineAsync(routineId)).ReturnsAsync(emptyList);
+
+            // Act
+            var result = await _controller.GetWorkoutDaysByRoutine(routineId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var returnedWorkoutDays = Assert.IsAssignableFrom<IEnumerable<WorkoutDayResponseDto>>(okResult.Value);
+            Assert.Empty(returnedWorkoutDays);
         }
 
         [Fact]

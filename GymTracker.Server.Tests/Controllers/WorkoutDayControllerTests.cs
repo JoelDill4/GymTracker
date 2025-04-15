@@ -5,6 +5,8 @@ using GymTracker.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using GymTracker.Server.Dtos.WorkoutDayExercise;
+using GymTracker.Server.Dtos.BodyPart;
 
 namespace GymTracker.Server.Tests.Controllers
 {
@@ -182,55 +184,33 @@ namespace GymTracker.Server.Tests.Controllers
         }
 
         [Fact]
-        public async Task DeleteWorkoutDay_WithValidId_ReturnsNoContent()
-        {
-            // Arrange
-            var workoutDayId = Guid.NewGuid();
-            _mockWorkoutDayManager.Setup(m => m.DeleteWorkoutDayAsync(workoutDayId)).ReturnsAsync(true);
-
-            // Act
-            var result = await _controller.DeleteWorkoutDay(workoutDayId);
-
-            // Assert
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteWorkoutDay_WithNonExistentId_ReturnsNotFound()
-        {
-            // Arrange
-            var workoutDayId = Guid.NewGuid();
-            _mockWorkoutDayManager.Setup(m => m.DeleteWorkoutDayAsync(workoutDayId)).ReturnsAsync(false);
-
-            // Act
-            var result = await _controller.DeleteWorkoutDay(workoutDayId);
-
-            // Assert
-            Assert.IsType<NotFoundObjectResult>(result);
-        }
-
-        [Fact]
         public async Task GetExercisesFromWorkoutDay_WithValidId_ReturnsOkResult()
         {
             // Arrange
             var workoutDayId = Guid.NewGuid();
             var exercises = new List<WorkoutDayExerciseResponseDto>
             {
-                new WorkoutDayExerciseResponseDto 
-                { 
+                new WorkoutDayExerciseResponseDto
+                {
                     id = Guid.NewGuid(),
                     name = "Bench Press",
                     description = "Chest exercise",
-                    bodyPartId = Guid.NewGuid(),
-                    bodyPartName = "Chest"
+                    bodyPartDto = new BodyPartDto
+                    {
+                        id = Guid.NewGuid(),
+                        name = "Chest"
+                    }
                 },
-                new WorkoutDayExerciseResponseDto 
-                { 
+                new WorkoutDayExerciseResponseDto
+                {
                     id = Guid.NewGuid(),
                     name = "Squats",
                     description = "Leg exercise",
-                    bodyPartId = Guid.NewGuid(),
-                    bodyPartName = "Legs"
+                    bodyPartDto = new BodyPartDto
+                    {
+                        id = Guid.NewGuid(),
+                        name = "Legs"
+                    }
                 }
             };
             _mockWorkoutDayManager.Setup(m => m.GetExercisesFromWorkoutDayAsync(workoutDayId))
@@ -258,6 +238,54 @@ namespace GymTracker.Server.Tests.Controllers
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task AssignExercisesOfWorkoutDay_WithValidIds_ReturnsNoContent()
+        {
+            // Arrange
+            var workoutDayId = Guid.NewGuid();
+            var exercisesIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            _mockWorkoutDayManager.Setup(m => m.AssignExercisesToWorkoutDayAsync(workoutDayId, exercisesIds))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _controller.AssignExercisesOfWorkoutDay(workoutDayId, exercisesIds);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task AssignExercisesOfWorkoutDay_WithInvalidWorkoutDayId_ReturnsNotFound()
+        {
+            // Arrange
+            var workoutDayId = Guid.NewGuid();
+            var exercisesIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            _mockWorkoutDayManager.Setup(m => m.AssignExercisesToWorkoutDayAsync(workoutDayId, exercisesIds))
+                .ThrowsAsync(new KeyNotFoundException($"Workout day with ID {workoutDayId} not found"));
+
+            // Act
+            var result = await _controller.AssignExercisesOfWorkoutDay(workoutDayId, exercisesIds);
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task AssignExercisesOfWorkoutDay_WithInvalidExercisesId_ReturnsNotFound()
+        {
+            // Arrange
+            var workoutDayId = Guid.NewGuid();
+            var exercisesIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            _mockWorkoutDayManager.Setup(m => m.AssignExercisesToWorkoutDayAsync(workoutDayId, exercisesIds))
+                .ThrowsAsync(new KeyNotFoundException($"Exercises with IDs {string.Join(", ", exercisesIds)} not found"));
+
+            // Act
+            var result = await _controller.AssignExercisesOfWorkoutDay(workoutDayId, exercisesIds);
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
@@ -351,6 +379,34 @@ namespace GymTracker.Server.Tests.Controllers
 
             // Act
             var result = await _controller.RemoveExerciseFromWorkoutDay(workoutDayId, exerciseId);
+
+            // Assert
+            Assert.IsType<NotFoundObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteWorkoutDay_WithValidId_ReturnsNoContent()
+        {
+            // Arrange
+            var workoutDayId = Guid.NewGuid();
+            _mockWorkoutDayManager.Setup(m => m.DeleteWorkoutDayAsync(workoutDayId)).ReturnsAsync(true);
+
+            // Act
+            var result = await _controller.DeleteWorkoutDay(workoutDayId);
+
+            // Assert
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteWorkoutDay_WithNonExistentId_ReturnsNotFound()
+        {
+            // Arrange
+            var workoutDayId = Guid.NewGuid();
+            _mockWorkoutDayManager.Setup(m => m.DeleteWorkoutDayAsync(workoutDayId)).ReturnsAsync(false);
+
+            // Act
+            var result = await _controller.DeleteWorkoutDay(workoutDayId);
 
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
