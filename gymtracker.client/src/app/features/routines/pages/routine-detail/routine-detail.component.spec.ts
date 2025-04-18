@@ -31,14 +31,18 @@ describe('RoutineDetailComponent', () => {
       name: 'Day 1',
       description: 'Push Day',
       routine: mockRoutine,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     },
     {
       id: '2',
       name: 'Day 2',
       description: 'Pull Day',
       routine: mockRoutine,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     }
   ];
 
@@ -149,7 +153,9 @@ describe('RoutineDetailComponent', () => {
       name: 'Day 3',
       description: 'Legs Day',
       routine: mockRoutine,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     };
 
     component.showCreateModal = true;

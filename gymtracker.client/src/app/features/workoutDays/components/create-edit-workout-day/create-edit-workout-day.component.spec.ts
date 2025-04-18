@@ -2,25 +2,31 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { CreateWorkoutDayComponent } from './create-edit-workout-day.component';
 import { WorkoutDayService } from '../../services/workoutday.service';
 import { of, throwError } from 'rxjs';
-import { WorkoutDay, CreateWorkoutDayDto } from '../../models/workoutday.model';
+import { WorkoutDay } from '../../models/workoutday.model';
+import { Routine } from '../../../routines/models/routine.model';
 
 describe('CreateWorkoutDayComponent', () => {
   let component: CreateWorkoutDayComponent;
   let fixture: ComponentFixture<CreateWorkoutDayComponent>;
   let workoutDayService: jasmine.SpyObj<WorkoutDayService>;
 
+  const mockRoutine: Routine = {
+    id: '1',
+    name: 'Test Routine',
+    description: 'Test Description',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    isDeleted: false
+  };
+
   const mockWorkoutDay: WorkoutDay = {
     id: '1',
     name: 'Test Workout Day',
     description: 'Test Description',
+    routine: mockRoutine,
     createdAt: new Date(),
-    updatedAt: new Date()
-  };
-
-  const mockCreateWorkoutDayDto: CreateWorkoutDayDto = {
-    name: 'Test Workout Day',
-    description: 'Test Description',
-    routineId: '1'
+    updatedAt: new Date(),
+    isDeleted: false
   };
 
   beforeEach(async () => {
@@ -112,11 +118,15 @@ describe('CreateWorkoutDayComponent', () => {
       const createdSpy = spyOn(component.created, 'emit');
       const cancelSpy = spyOn(component.cancel, 'emit');
 
-      component.workoutDay = mockCreateWorkoutDayDto;
+      component.workoutDay = {
+        name: 'Test Workout Day',
+        description: 'Test Description',
+        routineId: '1'
+      };
       component.onSubmit();
       tick();
 
-      expect(workoutDayService.createWorkoutDay).toHaveBeenCalledWith(mockCreateWorkoutDayDto);
+      expect(workoutDayService.createWorkoutDay).toHaveBeenCalledWith(component.workoutDay);
       expect(createdSpy).toHaveBeenCalledWith(mockWorkoutDay);
       expect(cancelSpy).toHaveBeenCalled();
       expect(component.loading).toBeFalse();
@@ -128,11 +138,15 @@ describe('CreateWorkoutDayComponent', () => {
       const createdSpy = spyOn(component.created, 'emit');
       const cancelSpy = spyOn(component.cancel, 'emit');
 
-      component.workoutDay = mockCreateWorkoutDayDto;
+      component.workoutDay = {
+        name: 'Test Workout Day',
+        description: 'Test Description',
+        routineId: '1'
+      };
       component.onSubmit();
       tick();
 
-      expect(workoutDayService.createWorkoutDay).toHaveBeenCalledWith(mockCreateWorkoutDayDto);
+      expect(workoutDayService.createWorkoutDay).toHaveBeenCalledWith(component.workoutDay);
       expect(createdSpy).not.toHaveBeenCalled();
       expect(cancelSpy).not.toHaveBeenCalled();
       expect(component.loading).toBeFalse();

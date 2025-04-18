@@ -4,6 +4,7 @@ using GymTracker.Server.DatabaseConnection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymTracker.Server.Migrations
 {
     [DbContext(typeof(GymTrackerContext))]
-    partial class GymTrackerContextModelSnapshot : ModelSnapshot
+    [Migration("20250416155539_renameTableExerciseSet")]
+    partial class renameTableExerciseSet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,8 +51,8 @@ namespace GymTracker.Server.Migrations
                     b.Property<DateTime?>("updatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("weight")
-                        .HasColumnType("decimal(5,2)");
+                    b.Property<int>("weight")
+                        .HasColumnType("int");
 
                     b.HasKey("id");
 
@@ -225,7 +227,7 @@ namespace GymTracker.Server.Migrations
                     b.Property<DateTime>("createdAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("fk_workoutDay")
+                    b.Property<Guid>("fk_workoutDay")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("isDeleted")
@@ -339,7 +341,9 @@ namespace GymTracker.Server.Migrations
                 {
                     b.HasOne("GymTracker.Server.Models.WorkoutDay", "workoutDay")
                         .WithMany()
-                        .HasForeignKey("fk_workoutDay");
+                        .HasForeignKey("fk_workoutDay")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("workoutDay");
                 });

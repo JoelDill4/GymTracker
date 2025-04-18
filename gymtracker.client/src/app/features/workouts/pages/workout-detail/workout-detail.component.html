@@ -1,0 +1,71 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h2>{{ workoutDay?.name }} Workouts</h2>
+      <button class="btn btn-primary" (click)="createWorkout()">
+        <i class="bi bi-plus-circle me-2"></i>
+        New Workout
+      </button>
+    </div>
+    <div class="col-12">
+      <p *ngIf="workoutDay?.description">{{ workoutDay?.description }}</p>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <div *ngIf="workouts.length === 0" class="alert alert-info">
+        No workouts found for this workout day.
+      </div>
+
+      <div *ngFor="let workout of workouts" class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">{{ workout.workoutDate | date:'mediumDate' }}</h5>
+          <div>
+            <button class="btn btn-sm btn-outline-primary me-2" (click)="editWorkout(workout.id)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteWorkout(workout.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <p *ngIf="workout.observations" class="card-text">{{ workout.observations }}</p>
+          
+          <div class="exercise-sets">
+            <div *ngFor="let set of workout.exerciseSets" class="exercise-set mb-3">
+              <h6>{{ set.exercise.name }}</h6>
+              <div class="row">
+                <div class="col-md-3">
+                  <strong>Sets:</strong> {{ set.sets }}
+                </div>
+                <div class="col-md-3">
+                  <strong>Reps:</strong> {{ set.reps }}
+                </div>
+                <div class="col-md-3">
+                  <strong>Weight:</strong> {{ set.weight }}kg
+                </div>
+                <div class="col-md-3">
+                  <strong>Rest:</strong> {{ set.restTime }}s
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-create-workout
+  *ngIf="showCreateModal"
+  [workoutDayId]="workoutDayId"
+  [exercises]="exercises"
+  (cancel)="onCancelCreate()"
+  (created)="onWorkoutCreated($event)">
+</app-create-workout> 

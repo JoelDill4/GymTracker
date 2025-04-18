@@ -10,8 +10,11 @@ public class ExerciseSet
 
     public int order { get; set; }
 
-    public int weight { get; set; }
+    [Range(0, 1000)]
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal weight { get; set; }
 
+    [Range(0, 100)]
     public int reps { get; set; }
 
     [Required]

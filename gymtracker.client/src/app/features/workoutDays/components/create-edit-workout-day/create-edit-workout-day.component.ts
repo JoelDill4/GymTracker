@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { WorkoutDay, CreateWorkoutDayDto } from '../../models/workoutday.model';
+import { WorkoutDay } from '../../models/workoutday.model';
 import { WorkoutDayService } from '../../services/workoutday.service';
 import { BaseModalComponent } from '../../../../shared/components/base-modal/base-modal.component';
 import { FormFieldComponent } from '../../../../shared/components/form-field/form-field.component';
@@ -20,7 +20,7 @@ export class CreateWorkoutDayComponent implements OnInit {
   @Output() created = new EventEmitter<WorkoutDay>();
   @Output() updated = new EventEmitter<WorkoutDay>();
 
-  workoutDay: CreateWorkoutDayDto = {
+  workoutDay: Pick<WorkoutDay, 'name' | 'description'> & { routineId: string } = {
     name: '',
     description: '',
     routineId: ''
@@ -38,7 +38,7 @@ export class CreateWorkoutDayComponent implements OnInit {
       this.isEditing = true;
       this.workoutDay = {
         name: this.workoutDayToEdit.name,
-        description: this.workoutDayToEdit.description || '',
+        description: this.workoutDayToEdit.description,
         routineId: this.routineId
       };
     }

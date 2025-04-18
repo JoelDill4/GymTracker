@@ -1,6 +1,5 @@
-﻿using GymTracker.Server.Dtos.WorkoutDay;
-using GymTracker.Server.Dtos.WorkoutDayExercise;
-using GymTracker.Server.Models;
+﻿using GymTracker.Server.Dtos.Exercise;
+using GymTracker.Server.Dtos.WorkoutDay;
 
 namespace GymTracker.Server.Services
 {
@@ -56,7 +55,7 @@ namespace GymTracker.Server.Services
         /// </summary>
         /// <param name="workoutDayId">The ID of the workout day</param>
         /// <returns>A collection of exercises</returns>
-        Task<IEnumerable<WorkoutDayExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
+        Task<IEnumerable<ExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId);
 
         /// <summary>
         /// Assign exercises to a workout day

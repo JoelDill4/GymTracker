@@ -1,8 +1,8 @@
 ﻿using GymTracker.Server.DatabaseConnection;
 using GymTracker.Server.Dtos.BodyPart;
+using GymTracker.Server.Dtos.Exercise;
 using GymTracker.Server.Dtos.Routine;
 using GymTracker.Server.Dtos.WorkoutDay;
-using GymTracker.Server.Dtos.WorkoutDayExercise;
 using GymTracker.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -158,7 +158,7 @@ namespace GymTracker.Server.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<WorkoutDayExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId)
+        public async Task<IEnumerable<ExerciseResponseDto>> GetExercisesFromWorkoutDayAsync(Guid workoutDayId)
         {
             var workoutDay = await _context.WorkoutDay
                 .Include(wd => wd.workoutDayExercises)
@@ -170,12 +170,12 @@ namespace GymTracker.Server.Services
                 throw new KeyNotFoundException($"Workout day with ID {workoutDayId} not found");
 
             return workoutDay.workoutDayExercises
-                .Select(wde => new WorkoutDayExerciseResponseDto
+                .Select(wde => new ExerciseResponseDto
                 {
                     id = wde.exercise.id,
                     name = wde.exercise.name,
                     description = wde.exercise.description,
-                    bodyPartDto = new BodyPartDto
+                    bodyPart = new BodyPartDto
                     {
                         id = wde.exercise.fk_bodyPart,
                         name = wde.exercise.bodyPart.name

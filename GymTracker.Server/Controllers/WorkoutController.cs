@@ -1,3 +1,4 @@
+using GymTracker.Server.Dtos.ExerciseSet;
 using GymTracker.Server.Dtos.Workout;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,9 @@ using System.Net.Mime;
 
 namespace GymTracker.Server.Controllers
 {
+    /// <summary>
+    /// Controller for managing workouts
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -13,13 +17,22 @@ namespace GymTracker.Server.Controllers
         private readonly IWorkoutManager _workoutManager;
         private readonly ILogger<WorkoutController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of WorkoutController
+        /// </summary>
+        /// <param name="workoutManager">The workout manager service</param>
+        /// <param name="logger">The logger service</param>
         public WorkoutController(IWorkoutManager workoutManager, ILogger<WorkoutController> logger)
         {
             _workoutManager = workoutManager;
             _logger = logger;
         }
 
-        /*[HttpGet]
+        /// <summary>
+        /// Gets all non-deleted workouts
+        /// </summary>
+        /// <returns>A collection of workouts</returns>
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<WorkoutResponseDto>>> GetWorkouts()
         {
@@ -27,6 +40,11 @@ namespace GymTracker.Server.Controllers
             return Ok(workouts);
         }
 
+        /// <summary>
+        /// Gets a specific workout by ID
+        /// </summary>
+        /// <param name="id">The ID of the workout to retrieve</param>
+        /// <returns>The workout if found</returns>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,16 +60,27 @@ namespace GymTracker.Server.Controllers
             return Ok(workout);
         }
 
+        /// <summary>
+        /// Gets workouts within a specified date range
+        /// </summary>
+        /// <param name="startDate">The start date of the range (optional)</param>
+        /// <param name="endDate">The end date of the range (optional)</param>
+        /// <returns>A collection of workouts within the date range</returns>
         [HttpGet("daterange")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<WorkoutResponseDto>>> GetWorkoutsByDateRange(
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
         {
             var workouts = await _workoutManager.GetWorkoutsByDateRangeAsync(startDate, endDate);
             return Ok(workouts);
         }
 
+        /// <summary>
+        /// Gets all workouts associated with a specific workout day
+        /// </summary>
+        /// <param name="workoutDayId">The ID of the workout day</param>
+        /// <returns>A collection of workouts for the specified workout day</returns>
         [HttpGet("workoutday/{workoutDayId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<WorkoutResponseDto>>> GetWorkoutsByWorkoutDay(Guid workoutDayId)
@@ -60,6 +89,11 @@ namespace GymTracker.Server.Controllers
             return Ok(workouts);
         }
 
+        /// <summary>
+        /// Creates a new workout
+        /// </summary>
+        /// <param name="workoutDto">The workout data to create</param>
+        /// <returns>The created workout</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -73,7 +107,7 @@ namespace GymTracker.Server.Controllers
             try
             {
                 var createdWorkout = await _workoutManager.CreateWorkoutAsync(workoutDto);
-                return CreatedAtAction(nameof(GetWorkout), new { id = createdWorkout.Id }, createdWorkout);
+                return CreatedAtAction(nameof(GetWorkout), new { id = createdWorkout.id }, createdWorkout);
             }
             catch (KeyNotFoundException ex)
             {
@@ -86,6 +120,12 @@ namespace GymTracker.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing workout
+        /// </summary>
+        /// <param name="id">The ID of the workout to update</param>
+        /// <param name="workoutDto">The updated workout data</param>
+        /// <returns>The updated workout</returns>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -95,11 +135,6 @@ namespace GymTracker.Server.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-
-            if (id != workoutDto.Id)
-            {
-                return BadRequest("ID in URL must match ID in body");
             }
 
             try
@@ -118,6 +153,11 @@ namespace GymTracker.Server.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes a workout
+        /// </summary>
+        /// <param name="id">The ID of the workout to delete</param>
+        /// <returns>No content if successful</returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -133,29 +173,78 @@ namespace GymTracker.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet("getExercises/{workoutId}")]
-        public IEnumerable<ExerciseExecutionDto> GetExercisesExecutionsFromWorkout(Guid workoutId)
+        /// <summary>
+        /// Gets all exercise sets from a workout
+        /// </summary>
+        /// <param name="workoutId">The ID of the workout</param>
+        /// <returns>A collection of exercise sets</returns>
+        [HttpGet("getExerciseSets/{workoutId}")]
+        public ActionResult<IEnumerable<ExerciseSetDto>> GetExerciseSetsFromWorkout(Guid workoutId)
         {
-            List<ExerciseExecutionDto> exercisesExecutions = _workoutManager.GetExercisesExecutionsFromWorkout(workoutId);
-
-            return exercisesExecutions;
+            try
+            {
+                var exerciseSets = _workoutManager.GetExerciseSetsFromWorkout(workoutId);
+                return Ok(exerciseSets);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPost("addExerciseExecution/{workoutId}")]
-        public IActionResult AddExerciseExecutionToWorkout(Guid workoutId, [FromBody] ExerciseExecutionDto exerciseExecutionDto)
+        /// <summary>
+        /// Adds an exercise set to a workout
+        /// </summary>
+        /// <param name="workoutId">The ID of the workout</param>
+        /// <param name="exerciseSetDto">The exercise set data to add</param>
+        /// <returns>Ok if successful</returns>
+        [HttpPost("addExerciseSet/{workoutId}")]
+        public IActionResult AddExerciseSetToWorkout(Guid workoutId, [FromBody] ExerciseSetDto exerciseSetDto)
         {
-            _workoutManager.AddExerciseExecutionToWorkout(workoutId, exerciseExecutionDto);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            return Ok("The exercise execution has been added to the workout");
+            try
+            {
+                _workoutManager.AddExerciseSetToWorkout(workoutId, exerciseSetDto);
+                return Ok("The exercise set has been added to the workout");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding exercise set to workout");
+                return StatusCode(500, "An error occurred while adding the exercise set to the workout");
+            }
         }
 
-        [HttpPost("removeExerciseExecution/{workoutId}/{exerciseId}")]
-        public IActionResult RemoveExerciseExecutionFromWorkout(Guid workoutId, Guid exerciseId)
+        /// <summary>
+        /// Removes an exercise set from a workout
+        /// </summary>
+        /// <param name="workoutId">The ID of the workout</param>
+        /// <param name="exerciseSetId">The ID of the exercise set to remove</param>
+        /// <returns>Ok if successful</returns>
+        [HttpPost("removeExerciseSet/{workoutId}/{exerciseSetId}")]
+        public IActionResult RemoveExerciseSetFromWorkout(Guid workoutId, Guid exerciseSetId)
         {
-            _workoutManager.RemoveExerciseExecutionFromWorkout(workoutId, exerciseId);
-
-            return Ok("The exercise execution has been removed from the workout");
+            try
+            {
+                _workoutManager.RemoveExerciseSetFromWorkout(workoutId, exerciseSetId);
+                return Ok("The exercise set has been removed from the workout");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing exercise set from workout");
+                return StatusCode(500, "An error occurred while removing the exercise set from the workout");
+            }
         }
-        */
     }
 }

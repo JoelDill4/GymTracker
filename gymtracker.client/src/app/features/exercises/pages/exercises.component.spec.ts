@@ -21,8 +21,14 @@ describe('ExercisesComponent', () => {
       description: 'Chest exercise',
       bodyPart: {
         id: '1',
-        name: 'Chest'
-      }
+        name: 'Chest',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     },
     {
       id: '2',
@@ -30,8 +36,14 @@ describe('ExercisesComponent', () => {
       description: 'Leg exercise',
       bodyPart: {
         id: '2',
-        name: 'Legs'
-      }
+        name: 'Legs',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     }
   ];
 

@@ -1,5 +1,5 @@
+using GymTracker.Server.Dtos.Exercise;
 using GymTracker.Server.Dtos.WorkoutDay;
-using GymTracker.Server.Dtos.WorkoutDayExercise;
 using GymTracker.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
@@ -132,7 +132,7 @@ namespace GymTracker.Server.Controllers
         [HttpGet("exercises/{workoutDayId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<WorkoutDayExerciseResponseDto>>> GetExercisesFromWorkoutDay(Guid workoutDayId)
+        public async Task<ActionResult<IEnumerable<ExerciseResponseDto>>> GetExercisesFromWorkoutDay(Guid workoutDayId)
         {
             try
             {

@@ -6,7 +6,7 @@ import { FormFieldComponent } from '../../../../shared/components/form-field/for
 import { ModalFooterComponent } from '../../../../shared/components/modal-footer/modal-footer.component';
 import { BodyPart } from '../../../bodyParts/models/body-part.model';
 import { BodyPartService } from '../../../bodyParts/services/body-part.service';
-import { CreateExerciseDto, Exercise } from '../../models/exercise.model';
+import { Exercise } from '../../models/exercise.model';
 import { ExerciseService } from '../../services/exercise.service';
 
 @Component({
@@ -27,12 +27,15 @@ export class CreateExerciseComponent implements OnInit {
   @Output() created = new EventEmitter<Exercise>();
   @Output() updated = new EventEmitter<Exercise>();
 
-  exercise: Exercise = {
+  exercise: Pick<Exercise, 'name' | 'description' | 'bodyPart'> = {
     name: '',
     description: '',
     bodyPart: {
       id: '',
-      name: ''
+      name: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDeleted: false
     }
   };
 
@@ -51,7 +54,11 @@ export class CreateExerciseComponent implements OnInit {
     this.loadBodyParts();
     if (this.exerciseToEdit) {
       this.isEditing = true;
-      this.exercise = { ...this.exerciseToEdit };
+      this.exercise = {
+        name: this.exerciseToEdit.name,
+        description: this.exerciseToEdit.description,
+        bodyPart: this.exerciseToEdit.bodyPart
+      };
       this.selectedBodyPartId = this.exerciseToEdit.bodyPart.id;
     }
   }
@@ -78,10 +85,16 @@ export class CreateExerciseComponent implements OnInit {
       return;
     }
 
-    const exerciseData: CreateExerciseDto = {
+    const exerciseData: Pick<Exercise, 'name' | 'description' | 'bodyPart'> = {
       name: this.exercise.name,
       description: this.exercise.description,
-      fk_bodyPart: this.selectedBodyPartId
+      bodyPart: {
+        id: this.selectedBodyPartId,
+        name: this.bodyParts.find(bp => bp.id === this.selectedBodyPartId)?.name || '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isDeleted: false
+      }
     };
 
     this.loading = true;

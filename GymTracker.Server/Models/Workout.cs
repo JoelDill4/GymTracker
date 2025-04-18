@@ -15,10 +15,10 @@ namespace GymTracker.Server.Models
         [StringLength(1000)]
         public string? observations { get; set; }
 
-        public Guid fk_workoutDay { get; set; }
+        public Guid? fk_workoutDay { get; set; }
 
         [ForeignKey("fk_workoutDay")]
-        public virtual WorkoutDay workoutDay { get; set; }
+        public virtual WorkoutDay? workoutDay { get; set; }
 
         public virtual ICollection<ExerciseSet> exerciseSets { get; set; } = new List<ExerciseSet>();
 

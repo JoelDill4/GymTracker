@@ -6,7 +6,7 @@ import { Exercise } from '../../../exercises/models/exercise.model';
 import { BodyPart } from '../../../bodyParts/models/body-part.model';
 import { BodyPartService } from '../../../bodyParts/services/body-part.service';
 import { ExerciseService } from '../../../exercises/services/exercise.service';
-import { WorkoutDay, WorkoutDayExercise } from '../../models/workoutday.model';
+import { WorkoutDay } from '../../models/workoutday.model';
 import { WorkoutDayService } from '../../services/workoutday.service';
 
 @Component({
@@ -18,7 +18,7 @@ import { WorkoutDayService } from '../../services/workoutday.service';
 })
 export class WorkoutDayExercisesComponent implements OnInit {
   workoutDay: WorkoutDay | null = null;
-  exercises: WorkoutDayExercise[] = [];
+  exercises: Exercise[] = [];
   availableExercises: Exercise[] = [];
   filteredExercises: Exercise[] = [];
   selectedExerciseId: string | null = null;
@@ -52,7 +52,7 @@ export class WorkoutDayExercisesComponent implements OnInit {
   }
 
   private loadExercises(workoutDayId: string): void {
-    this.workoutDayService.getExercisesFromWorkoutDay(workoutDayId).subscribe(
+    this.workoutDayService.getExercisesByWorkoutDay(workoutDayId).subscribe(
       exercises => {
         this.exercises = exercises;
         this.updateFilteredExercises();
@@ -107,13 +107,7 @@ export class WorkoutDayExercisesComponent implements OnInit {
 
     const exercise = this.filteredExercises.find(e => e.id === this.selectedExerciseId);
     if (exercise && exercise.id) {
-      this.exercises.push({
-        id: exercise.id,
-        name: exercise.name,
-        description: exercise.description,
-        bodyPartId: exercise.bodyPart.id,
-        bodyPartName: exercise.bodyPart.name
-      });
+      this.exercises.push(exercise);
       this.selectedExerciseId = null;
       this.updateFilteredExercises();
     }
@@ -143,5 +137,13 @@ export class WorkoutDayExercisesComponent implements OnInit {
         console.error('Error saving exercises:', error);
       }
     );
+  }
+
+  viewWorkouts(): void {
+    if (this.workoutDay) {
+      const currentUrl = this.router.url;
+      const workoutsUrl = currentUrl.replace('/exercises', '/workouts');
+      this.router.navigateByUrl(workoutsUrl);
+    }
   }
 } 

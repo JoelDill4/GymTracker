@@ -1,12 +1,11 @@
 using GymTracker.Server.Controllers;
+using GymTracker.Server.Dtos.BodyPart;
+using GymTracker.Server.Dtos.Exercise;
 using GymTracker.Server.Dtos.WorkoutDay;
 using GymTracker.Server.Services;
-using GymTracker.Server.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using GymTracker.Server.Dtos.WorkoutDayExercise;
-using GymTracker.Server.Dtos.BodyPart;
 
 namespace GymTracker.Server.Tests.Controllers
 {
@@ -188,25 +187,25 @@ namespace GymTracker.Server.Tests.Controllers
         {
             // Arrange
             var workoutDayId = Guid.NewGuid();
-            var exercises = new List<WorkoutDayExerciseResponseDto>
+            var exercises = new List<ExerciseResponseDto>
             {
-                new WorkoutDayExerciseResponseDto
+                new ExerciseResponseDto
                 {
                     id = Guid.NewGuid(),
                     name = "Bench Press",
                     description = "Chest exercise",
-                    bodyPartDto = new BodyPartDto
+                    bodyPart = new BodyPartDto
                     {
                         id = Guid.NewGuid(),
                         name = "Chest"
                     }
                 },
-                new WorkoutDayExerciseResponseDto
+                new ExerciseResponseDto
                 {
                     id = Guid.NewGuid(),
                     name = "Squats",
                     description = "Leg exercise",
-                    bodyPartDto = new BodyPartDto
+                    bodyPart = new BodyPartDto
                     {
                         id = Guid.NewGuid(),
                         name = "Legs"
@@ -221,7 +220,7 @@ namespace GymTracker.Server.Tests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnedExercises = Assert.IsAssignableFrom<IEnumerable<WorkoutDayExerciseResponseDto>>(okResult.Value);
+            var returnedExercises = Assert.IsAssignableFrom<IEnumerable<ExerciseResponseDto>>(okResult.Value);
             Assert.Equal(2, returnedExercises.Count());
         }
 

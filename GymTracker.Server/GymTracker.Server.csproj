@@ -40,4 +40,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dtos\ExerciseSet\" />
+    <Folder Include="Dtos\Workout\" />
+  </ItemGroup>
+
 </Project>

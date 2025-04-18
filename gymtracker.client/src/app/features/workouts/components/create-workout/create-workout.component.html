@@ -1,0 +1,103 @@
+<div class="modal fade show" style="display: block;" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Workout</h5>
+        <button type="button" class="btn-close" (click)="onCancel()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Basic Information -->
+        <div *ngIf="currentStep === 1">
+          <div class="mb-3">
+            <label for="workoutDate" class="form-label">Workout Date</label>
+            <input type="datetime-local" 
+                   class="form-control" 
+                   id="workoutDate" 
+                   [(ngModel)]="workout.workoutDate" 
+                   name="workoutDate" 
+                   required>
+          </div>
+          <div class="mb-3">
+            <label for="observations" class="form-label">Observations</label>
+            <textarea class="form-control" 
+                      id="observations" 
+                      [(ngModel)]="workout.observations" 
+                      name="observations" 
+                      rows="3"></textarea>
+          </div>
+        </div>
+
+        <!-- Exercise Steps -->
+        <div *ngFor="let exerciseSet of workout.exerciseSets; let i = index">
+          <div *ngIf="currentStep === i + 2">
+            <h4>{{ exerciseSet.exercise.name }}</h4>
+            <div class="mb-3">
+              <label class="form-label">Sets</label>
+              <input type="number" 
+                     class="form-control" 
+                     [(ngModel)]="exerciseSet.sets" 
+                     name="sets" 
+                     min="0">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Reps</label>
+              <input type="number" 
+                     class="form-control" 
+                     [(ngModel)]="exerciseSet.reps" 
+                     name="reps" 
+                     min="0">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Weight (kg)</label>
+              <input type="number" 
+                     class="form-control" 
+                     [(ngModel)]="exerciseSet.weight" 
+                     name="weight" 
+                     min="0" 
+                     step="0.5">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rest Time (seconds)</label>
+              <input type="number" 
+                     class="form-control" 
+                     [(ngModel)]="exerciseSet.restTime" 
+                     name="restTime" 
+                     min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="alert alert-danger mt-3">
+          {{ error }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="d-flex justify-content-between w-100">
+          <div>
+            <button type="button" 
+                    class="btn btn-secondary" 
+                    (click)="previousStep()" 
+                    [disabled]="currentStep === 1">
+              Previous
+            </button>
+          </div>
+          <div>
+            <button type="button" 
+                    class="btn btn-secondary me-2" 
+                    (click)="onCancel()">
+              Cancel
+            </button>
+            <button type="button" 
+                    class="btn btn-primary" 
+                    (click)="currentStep === totalSteps ? onSubmit() : nextStep()" 
+                    [disabled]="loading">
+              {{ currentStep === totalSteps ? 'Create' : 'Next' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show"></div> 

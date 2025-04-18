@@ -25,7 +25,7 @@ namespace GymTracker.Server.DatabaseConnection
 
         public DbSet<Workout> Workout { get; set; }
 
-        public DbSet<ExerciseSet> ExerciseExecution { get; set; }
+        public DbSet<ExerciseSet> ExerciseSet { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

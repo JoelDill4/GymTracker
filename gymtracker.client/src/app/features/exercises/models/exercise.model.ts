@@ -1,15 +1,11 @@
-export interface Exercise {
-  id?: string;
-  name: string;
-  description?: string;
-  bodyPart: {
-    id: string;
-    name: string;
-  };
-}
+import { BodyPart } from "../../bodyParts/models/body-part.model";
 
-export interface CreateExerciseDto {
+export interface Exercise {
+  id: string;
   name: string;
-  description?: string;
-  fk_bodyPart: string;
+  description: string;
+  bodyPart: BodyPart;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
 } 
