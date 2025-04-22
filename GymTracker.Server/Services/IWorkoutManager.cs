@@ -66,6 +66,14 @@ namespace GymTracker.Server.Services
         List<ExerciseSetDto> GetExerciseSetsFromWorkout(Guid workoutId);
 
         /// <summary>
+        /// Assigns exercise sets for a specific exercise in a workout
+        /// </summary>
+        /// <param name="workoutId">The ID of the workout</param>
+        /// <param name="exerciseId">The ID of the exercise</param>
+        /// <param name="exerciseSets">The list of exercise sets to assign</param>
+        void AssignExerciseSetsOfExerciseToWorkout(Guid workoutId, Guid exerciseId, List<ExerciseSetDto> exerciseSets);
+
+        /// <summary>
         /// Adds an exercise set to a workout
         /// </summary>
         /// <param name="workoutId">The ID of the workout</param>

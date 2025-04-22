@@ -193,6 +193,40 @@ namespace GymTracker.Server.Controllers
         }
 
         /// <summary>
+        /// Assigns exercise sets for a specific exercise in a workout
+        /// </summary>
+        /// <param name="workoutId">The ID of the workout</param>
+        /// <param name="exerciseId">The ID of the exercise</param>
+        /// <param name="exerciseSets">The list of exercise sets to assign</param>
+        /// <returns>Ok if successful</returns>
+        [HttpPost("assignExerciseSets/{workoutId}/{exerciseId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult AssignExerciseSetsOfExerciseToWorkout(Guid workoutId, Guid exerciseId, [FromBody] List<ExerciseSetDto> exerciseSets)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _workoutManager.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets);
+                return Ok("The exercise sets have been assigned to the exercise in the workout");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error assigning exercise sets to exercise in workout");
+                return StatusCode(500, "An error occurred while assigning the exercise sets to the exercise in the workout");
+            }
+        }
+
+        /// <summary>
         /// Adds an exercise set to a workout
         /// </summary>
         /// <param name="workoutId">The ID of the workout</param>

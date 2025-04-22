@@ -153,6 +153,49 @@ namespace GymTracker.Server.Services
             }).ToList();
         }
 
+        public void AssignExerciseSetsOfExerciseToWorkout(Guid workoutId, Guid exerciseId, List<ExerciseSetDto> exerciseSets)
+        {
+            var workout = _context.Workout.Find(workoutId);
+            if (workout == null || workout.isDeleted)
+            {
+                throw new KeyNotFoundException($"Workout with ID {workoutId} not found");
+            }
+
+            var exercise = _context.Exercise.Find(exerciseId);
+            if (exercise == null || exercise.isDeleted)
+            {
+                throw new KeyNotFoundException($"Exercise with ID {exerciseId} not found");
+            }
+
+            // Remove existing exercise sets for this exercise
+            var existingSets = _context.ExerciseSet
+                .Where(es => es.fk_workout == workoutId && es.fk_exercise == exerciseId && !es.isDeleted)
+                .ToList();
+
+            foreach (var set in existingSets)
+            {
+                set.isDeleted = true;
+                set.updatedAt = DateTime.UtcNow;
+            }
+
+            // Add new exercise sets
+            foreach (var setDto in exerciseSets)
+            {
+                var exerciseSet = new ExerciseSet
+                {
+                    order = setDto.order,
+                    weight = setDto.weight,
+                    reps = setDto.reps,
+                    fk_workout = workoutId,
+                    fk_exercise = exerciseId
+                };
+
+                _context.ExerciseSet.Add(exerciseSet);
+            }
+
+            _context.SaveChanges();
+        }
+
         public void AddExerciseSetToWorkout(Guid workoutId, ExerciseSetDto exerciseSetDto)
         {
             var workout = _context.Workout.Find(workoutId);

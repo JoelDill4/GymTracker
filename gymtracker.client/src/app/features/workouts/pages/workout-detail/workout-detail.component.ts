@@ -6,12 +6,13 @@ import { WorkoutService } from '../../services/workout.service';
 import { WorkoutDay } from '../../../workoutDays/models/workoutday.model';
 import { WorkoutDayService } from '../../../workoutDays/services/workoutday.service';
 import { Exercise } from '../../../exercises/models/exercise.model';
-import { CreateWorkoutComponent } from '../../components/create-workout/create-workout.component';
+import { CreateEditWorkoutComponent } from '../../components/create-workout/create-edit-workout.component';
+import { ExerciseSet } from '../../../exercisesSets/models/exercise-set.model';
 
 @Component({
   selector: 'app-workout-detail',
   standalone: true,
-  imports: [CommonModule, CreateWorkoutComponent],
+  imports: [CommonModule, CreateEditWorkoutComponent],
   templateUrl: './workout-detail.component.html'
 })
 export class WorkoutDetailComponent implements OnInit {
@@ -20,6 +21,8 @@ export class WorkoutDetailComponent implements OnInit {
   workouts: Workout[] = [];
   exercises: Exercise[] = [];
   showCreateModal = false;
+  workoutToEdit?: Workout;
+  exerciseToEdit?: string;
   loading = false;
   error = '';
 
@@ -37,6 +40,22 @@ export class WorkoutDetailComponent implements OnInit {
       this.loadWorkouts();
       this.loadExercises();
     }
+  }
+
+  getUniqueExercises(exerciseSets: ExerciseSet[]): Exercise[] {
+    const uniqueExercises = new Map<string, Exercise>();
+    exerciseSets.forEach(set => {
+      if (set.exercise && !uniqueExercises.has(set.exercise.id)) {
+        uniqueExercises.set(set.exercise.id, set.exercise);
+      }
+    });
+    return Array.from(uniqueExercises.values());
+  }
+
+  getSetsForExercise(exerciseSets: ExerciseSet[], exerciseId: string): ExerciseSet[] {
+    return exerciseSets
+      .filter(set => set.exercise.id === exerciseId)
+      .sort((a, b) => a.order - b.order);
   }
 
   loadWorkoutDay(): void {
@@ -73,6 +92,7 @@ export class WorkoutDetailComponent implements OnInit {
   }
 
   createWorkout(): void {
+    this.workoutToEdit = undefined;
     this.showCreateModal = true;
   }
 
@@ -81,12 +101,22 @@ export class WorkoutDetailComponent implements OnInit {
     this.showCreateModal = false;
   }
 
-  onCancelCreate(): void {
+  onWorkoutUpdated(workout: Workout): void {
+    const index = this.workouts.findIndex(w => w.id === workout.id);
+    if (index !== -1) {
+      this.workouts[index] = workout;
+    }
     this.showCreateModal = false;
+    this.workoutToEdit = undefined;
+    this.exerciseToEdit = undefined;
   }
 
   editWorkout(workoutId: string): void {
-    this.router.navigate(['/workouts', workoutId, 'edit']);
+    const workout = this.workouts.find(w => w.id === workoutId);
+    if (workout) {
+      this.workoutToEdit = workout;
+      this.showCreateModal = true;
+    }
   }
 
   deleteWorkout(workoutId: string): void {
@@ -99,6 +129,21 @@ export class WorkoutDetailComponent implements OnInit {
           this.error = err.error?.message || 'Failed to delete workout';
         }
       });
+    }
+  }
+
+  onCancelCreate(): void {
+    this.showCreateModal = false;
+    this.workoutToEdit = undefined;
+    this.exerciseToEdit = undefined;
+  }
+
+  editExerciseSets(workoutId: string, exerciseId: string): void {
+    const workout = this.workouts.find(w => w.id === workoutId);
+    if (workout) {
+      this.workoutToEdit = workout;
+      this.exerciseToEdit = exerciseId;
+      this.showCreateModal = true;
     }
   }
 

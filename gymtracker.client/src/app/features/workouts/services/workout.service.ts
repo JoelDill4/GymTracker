@@ -48,6 +48,10 @@ export class WorkoutService {
     return this.http.get<ExerciseSet[]>(`${this.apiUrl}/getExerciseSets/${workoutId}`);
   }
 
+  assignExerciseSetsOfExerciseToWorkout(workoutId: string, exerciseId: string, exerciseSets: ExerciseSet[]): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/assignExerciseSets/${workoutId}/${exerciseId}`, exerciseSets);
+  }
+
   addExerciseSetToWorkout(workoutId: string, exerciseSet: ExerciseSet): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/addExerciseSet/${workoutId}`, exerciseSet);
   }

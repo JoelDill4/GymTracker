@@ -1,18 +1,18 @@
 <div class="container mt-4">
-  <div class="row">
+  <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
-      <h2>{{ workoutDay?.name }} Workouts</h2>
-      <button class="btn btn-primary" (click)="createWorkout()">
+      <h2 class="mb-0 fw-bold">{{ workoutDay?.name }} - Workouts</h2>
+      <button class="btn btn-primary rounded-pill px-4" (click)="createWorkout()">
         <i class="bi bi-plus-circle me-2"></i>
         New Workout
       </button>
     </div>
-    <div class="col-12">
-      <p *ngIf="workoutDay?.description">{{ workoutDay?.description }}</p>
+    <div class="col-12 mt-2">
+      <p *ngIf="workoutDay?.description" class="text-muted">{{ workoutDay?.description }}</p>
     </div>
   </div>
 
-  <div class="row mt-4">
+  <div class="row">
     <div class="col-12">
       <div *ngIf="error" class="alert alert-danger">
         {{ error }}
@@ -22,38 +22,57 @@
         No workouts found for this workout day.
       </div>
 
-      <div *ngFor="let workout of workouts" class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">{{ workout.workoutDate | date:'mediumDate' }}</h5>
+      <div *ngFor="let workout of workouts" class="card shadow-sm mb-4 border-0">
+        <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold">{{ workout.workoutDate | date:'mediumDate' }}</h5>
           <div>
-            <button class="btn btn-sm btn-outline-primary me-2" (click)="editWorkout(workout.id)">
+            <button class="btn btn-sm btn-outline-primary me-2 rounded-pill" (click)="editWorkout(workout.id)">
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteWorkout(workout.id)">
+            <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="deleteWorkout(workout.id)">
               <i class="bi bi-trash"></i>
             </button>
           </div>
         </div>
         <div class="card-body">
-          <p *ngIf="workout.observations" class="card-text">{{ workout.observations }}</p>
+          <p *ngIf="workout.observations" class="card-text text-muted fst-italic mb-4">{{ workout.observations }}</p>
           
           <div class="exercise-sets">
-            <div *ngFor="let set of workout.exerciseSets" class="exercise-set mb-3">
-              <h6>{{ set.exercise.name }}</h6>
-              <div class="row">
-                <div class="col-md-3">
-                  <strong>Sets:</strong> {{ set.sets }}
+            <div class="row g-4">
+              <ng-container *ngFor="let exercise of getUniqueExercises(workout.exerciseSets)">
+                <div class="col-md-6">
+                  <div class="exercise-group bg-white border rounded-3 p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                      <h6 class="mb-0 fw-bold">{{ exercise.name }}</h6>
+                      <button class="btn btn-sm btn-outline-primary rounded-circle" (click)="editExerciseSets(workout.id, exercise.id)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                    </div>
+                    <div class="sets-container">
+                      <div *ngFor="let set of getSetsForExercise(workout.exerciseSets, exercise.id); let last = last" 
+                           class="set-item" 
+                           [class.mb-2]="!last"
+                           [class.pb-2]="!last"
+                           [class.border-bottom]="!last">
+                        <div class="row align-items-center">
+                          <div class="col-6 border-end">
+                            <div class="d-flex align-items-baseline">
+                              <strong class="text-primary me-2">Reps:</strong>
+                              <span>{{ set.reps }}</span>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="d-flex align-items-baseline">
+                              <strong class="text-primary me-2">Weight:</strong>
+                              <span>{{ set.weight }}kg</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-3">
-                  <strong>Reps:</strong> {{ set.reps }}
-                </div>
-                <div class="col-md-3">
-                  <strong>Weight:</strong> {{ set.weight }}kg
-                </div>
-                <div class="col-md-3">
-                  <strong>Rest:</strong> {{ set.restTime }}s
-                </div>
-              </div>
+              </ng-container>
             </div>
           </div>
         </div>
@@ -62,10 +81,13 @@
   </div>
 </div>
 
-<app-create-workout
+<app-create-edit-workout
   *ngIf="showCreateModal"
   [workoutDayId]="workoutDayId"
   [exercises]="exercises"
+  [workoutToEdit]="workoutToEdit"
+  [singleExerciseId]="exerciseToEdit"
   (cancel)="onCancelCreate()"
-  (created)="onWorkoutCreated($event)">
-</app-create-workout> 
+  (created)="onWorkoutCreated($event)"
+  (updated)="onWorkoutUpdated($event)">
+</app-create-edit-workout> 

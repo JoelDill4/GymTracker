@@ -35,28 +35,48 @@
       }
 
       .exercise-sets {
-        .exercise-set {
-          padding: 12px 0;
+        .exercise-group {
+          margin-bottom: 24px;
+          padding-bottom: 16px;
           border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 
           &:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
           }
 
-          h3 {
-            margin: 0 0 8px 0;
+          h6 {
+            margin: 0 0 16px 0;
             font-size: 16px;
             font-weight: 500;
+            color: rgba(0, 0, 0, 0.87);
           }
 
-          .set-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            
-            span {
-              color: rgba(0, 0, 0, 0.6);
-              font-size: 14px;
+          .sets-container {
+            .set-item {
+              padding: 8px 0;
+              border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              .row {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+
+                div {
+                  color: rgba(0, 0, 0, 0.6);
+                  font-size: 14px;
+
+                  strong {
+                    color: rgba(0, 0, 0, 0.87);
+                    margin-right: 8px;
+                  }
+                }
+              }
             }
           }
         }
