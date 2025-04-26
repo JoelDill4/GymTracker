@@ -7,12 +7,19 @@
 .card {
   margin-bottom: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
 
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  padding: 15px 20px;
+  &:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 15px 20px;
+  }
 }
 
 .card-body {
@@ -25,15 +32,161 @@
 
 .btn {
   margin-right: 5px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  &.btn-outline-danger {
+    &:hover {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+      color: white;
+    }
+  }
+
+  &.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+  }
 }
 
 .form-select {
   margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+  }
+}
+
+.form-floating {
+  > .form-select {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  > label {
+    padding: 1rem 0.75rem;
+  }
+}
+
+.table {
+  th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 1rem 0.75rem;
+  }
+}
+
+.badge {
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.bi-inbox-fill {
+  color: rgba(0, 0, 0, 0.2);
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
   .btn {
+    padding: 0.5rem 1rem;
+  }
+
+  .display-5 {
+    font-size: 2rem;
+  }
+
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  // Stack action buttons vertically and add horizontal padding
+  .row.mt-4 {
+    flex-direction: column;
+    padding: 0 10px;
+  }
+  .row.mt-4 .col-6 {
     width: 100%;
-    margin-bottom: 10px;
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+}
+
+// Exercise Cards
+.exercise-card {
+  transition: all 0.3s ease;
+  background: linear-gradient(to right bottom, #ffffff, #f8f9fa);
+  border-color: rgba(0, 0, 0, 0.05) !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.5em 0.85em;
+  }
+
+  p {
+    line-height: 1.5;
+    max-height: 3em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+.action-btn {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 0 1.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+// Custom utility class for width on small screens
+.w-sm-100 {
+  @media (max-width: 768px) {
+    width: 100% !important;
   }
 } 

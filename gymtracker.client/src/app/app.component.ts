@@ -16,12 +16,22 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     .app-container {
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
     }
 
     .main-content {
       flex: 1;
-      padding: 2rem 0;
+      padding: 2rem;
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      min-height: 100vh;
+      background-color: var(--background-color);
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+      }
     }
   `],
   standalone: true,

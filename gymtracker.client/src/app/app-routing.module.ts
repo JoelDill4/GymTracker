@@ -12,7 +12,8 @@ const routes: Routes = [
   { path: 'routines', component: RoutinesComponent },
   { path: 'routines/:id', component: RoutineDetailComponent },
   { path: 'routines/:routineId/workout-days/:workoutDayId/exercises', component: WorkoutDayExercisesComponent },
-  { path: 'routines/:routineId/workout-days/:workoutDayId/workouts', component: WorkoutDetailComponent }
+  { path: 'routines/:routineId/workout-days/:workoutDayId/workouts', component: WorkoutDetailComponent },
+  { path: 'workouts', component: WorkoutDetailComponent }
 ];
 
 @NgModule({

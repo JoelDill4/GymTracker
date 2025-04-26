@@ -1,48 +1,33 @@
-<div class="container mt-4">
+<div class="container fade-in">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-5 fw-bold">
+    <h2 class="mb-0 fw-bold">
       <i class="bi bi-calendar-week me-2"></i>Routines
-    </h1>
-    <button class="btn btn-primary" (click)="openCreateModal()">
-      <i class="bi bi-plus-lg"></i> New Routine
-    </button>
+    </h2>
+    <app-new-button
+      text="New Routine"
+      (onClick)="openCreateModal()">
+    </app-new-button>
   </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let routine of routines">
-                  <td>{{ routine.name }}</td>
-                  <td>{{ routine.description }}</td>
-                  <td>
-                    <button class="btn btn-sm btn-outline-primary me-2" [routerLink]="['/routines', routine.id]">
-                      <i class="bi bi-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary me-2" (click)="openEditModal(routine)">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="deleteRoutine(routine.id)">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+  <app-list-card
+    [items]="routines"
+    [showSearch]="false"
+    [showFilter]="false"
+    [icon]="'bi-calendar-week'"
+    [getItemTitle]="getRoutineTitle"
+    [getItemDescription]="getRoutineDescription"
+    [getItemRouterLink]="getRoutineRouterLink"
+    (itemClick)="onRoutineClick($event)">
+    <ng-template let-routine>
+      <div class="d-flex gap-2">
+        <app-edit-button (onClick)="openEditModal(routine)"></app-edit-button>
+        <app-delete-button (onClick)="deleteRoutine(routine.id)"></app-delete-button>
       </div>
-    </div>
+    </ng-template>
+  </app-list-card>
+
+  <div *ngIf="routines.length === 0" class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>No routines found. Click the New Routine button to add one.
   </div>
 </div>
 

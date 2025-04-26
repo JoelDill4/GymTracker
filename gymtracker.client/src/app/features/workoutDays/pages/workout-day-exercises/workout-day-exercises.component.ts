@@ -8,13 +8,14 @@ import { BodyPartService } from '../../../bodyParts/services/body-part.service';
 import { ExerciseService } from '../../../exercises/services/exercise.service';
 import { WorkoutDay } from '../../models/workoutday.model';
 import { WorkoutDayService } from '../../services/workoutday.service';
+import { DeleteButtonComponent } from '../../../../shared/components/delete-button/delete-button.component';
 
 @Component({
   selector: 'app-workout-day-exercises',
   templateUrl: './workout-day-exercises.component.html',
   styleUrls: ['./workout-day-exercises.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, DeleteButtonComponent]
 })
 export class WorkoutDayExercisesComponent implements OnInit {
   workoutDay: WorkoutDay | null = null;

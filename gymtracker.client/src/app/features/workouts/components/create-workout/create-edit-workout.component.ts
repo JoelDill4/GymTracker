@@ -58,16 +58,24 @@ export class CreateEditWorkoutComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['exercises']) {
-      this.updateTotalSteps();
-      this.initializeExerciseSets();
-    }
     if (changes['workoutToEdit'] && this.workoutToEdit) {
       this.isEditMode = true;
       this.totalSteps = 1;
       this.workout = { ...this.workoutToEdit };
+
+      const workoutExerciseIds = this.workoutToEdit.exerciseSets.map(set => set.exercise.id);
+      const allExerciseIds = Array.from(new Set([
+        ...this.exercises.map(e => e.id),
+        ...workoutExerciseIds
+      ]));
+
+      this.exercises = allExerciseIds.map(id => {
+        return this.exercises.find(e => e.id === id) ||
+               this.workoutToEdit!.exerciseSets.find(set => set.exercise.id === id)!.exercise;
+      });
+
       this.initializeExerciseSetsFromWorkout();
-      
+
       if (this.singleExerciseId) {
         const exerciseIndex = this.exercises.findIndex(e => e.id === this.singleExerciseId);
         if (exerciseIndex !== -1) {
@@ -75,6 +83,9 @@ export class CreateEditWorkoutComponent implements OnChanges {
           this.totalSteps = this.currentStep;
         }
       }
+    } else if (changes['exercises']) {
+      this.updateTotalSteps();
+      this.initializeExerciseSets();
     }
   }
 
@@ -111,9 +122,7 @@ export class CreateEditWorkoutComponent implements OnChanges {
 
   updateSetsForExercise(exerciseId: string): void {
     const currentSets = this.exerciseSets[exerciseId] || [];
-    const newNumberOfSets = Math.min(Math.max(this.numberOfSets[exerciseId] || 0, 0), 10);
-    
-    this.numberOfSets[exerciseId] = newNumberOfSets;
+    const newNumberOfSets = this.numberOfSets[exerciseId] || 1;
     
     while (currentSets.length < newNumberOfSets) {
       currentSets.push({
@@ -239,5 +248,23 @@ export class CreateEditWorkoutComponent implements OnChanges {
 
   onCancel(): void {
     this.cancel.emit();
+  }
+
+  clampNumberOfSets(exerciseId: string): void {
+    let value = Number(this.numberOfSets[exerciseId]);
+    if (!value) value = 1;
+    if (value < 1) value = 1;
+    if (value > 10) value = 10;
+
+    if (this.numberOfSets[exerciseId] !== value) {
+      this.numberOfSets[exerciseId] = value === 10 ? 1 : 10;
+      setTimeout(() => {
+        this.numberOfSets[exerciseId] = value;
+        this.updateSetsForExercise(exerciseId);
+      });
+    } else {
+      this.numberOfSets[exerciseId] = value;
+      this.updateSetsForExercise(exerciseId);
+    }
   }
 } 

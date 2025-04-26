@@ -27,7 +27,7 @@
             <label for="numberOfSets">Number of Sets</label>
             <input type="number" id="numberOfSets" 
                    [(ngModel)]="numberOfSets[getCurrentExercise()?.id || '']"
-                   (ngModelChange)="updateSetsForExercise(getCurrentExercise()?.id || '')"
+                   (ngModelChange)="clampNumberOfSets(getCurrentExercise()?.id || '')"
                    min="1" max="10" class="form-control">
           </div>
 

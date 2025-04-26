@@ -1,14 +1,20 @@
 <div class="container mt-4">
   <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
-      <h2 class="mb-0 fw-bold">{{ workoutDay?.name }} - Workouts</h2>
-      <button class="btn btn-primary rounded-pill px-4" (click)="createWorkout()">
-        <i class="bi bi-plus-circle me-2"></i>
-        New Workout
-      </button>
+      <h2 class="mb-0 fw-bold">
+        <i class="bi bi-lightning me-2"></i>
+        <ng-container *ngIf="workoutDay; else allWorkouts">
+          {{ workoutDay.name }}
+        </ng-container>
+        <ng-template #allWorkouts>Workouts</ng-template>
+      </h2>
+      <app-new-button
+        text="New Workout"
+        (onClick)="createWorkout()">
+      </app-new-button>
     </div>
-    <div class="col-12 mt-2">
-      <p *ngIf="workoutDay?.description" class="text-muted">{{ workoutDay?.description }}</p>
+    <div class="col-12 mt-2" *ngIf="workoutDay">
+      <p *ngIf="workoutDay.description" class="text-muted">{{ workoutDay.description }}</p>
     </div>
   </div>
 
@@ -18,20 +24,27 @@
         {{ error }}
       </div>
 
-      <div *ngIf="workouts.length === 0" class="alert alert-info">
-        No workouts found for this workout day.
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && workouts.length === 0" class="alert alert-info">
+        No workouts found.
       </div>
 
       <div *ngFor="let workout of workouts" class="card shadow-sm mb-4 border-0">
-        <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold">{{ workout.workoutDate | date:'mediumDate' }}</h5>
-          <div>
-            <button class="btn btn-sm btn-outline-primary me-2 rounded-pill" (click)="editWorkout(workout.id)">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="deleteWorkout(workout.id)">
-              <i class="bi bi-trash"></i>
-            </button>
+        <div class="card-header bg-light py-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0 fw-bold">{{ workout.workoutDate | date:'mediumDate' }}</h5>
+            <div class="d-flex gap-2">
+              <app-edit-button (onClick)="editWorkout(workout.id)"></app-edit-button>
+              <app-delete-button (onClick)="deleteWorkout(workout.id)"></app-delete-button>
+            </div>
+          </div>
+          <div *ngIf="!workoutDay && workout.workoutDay" class="text-muted small">
+            {{ workout.workoutDay.name }}
           </div>
         </div>
         <div class="card-body">
@@ -44,9 +57,7 @@
                   <div class="exercise-group bg-white border rounded-3 p-3 h-100">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                       <h6 class="mb-0 fw-bold">{{ exercise.name }}</h6>
-                      <button class="btn btn-sm btn-outline-primary rounded-circle" (click)="editExerciseSets(workout.id, exercise.id)">
-                        <i class="bi bi-pencil"></i>
-                      </button>
+                      <app-edit-button (onClick)="editExerciseSets(workout.id, exercise.id)"></app-edit-button>
                     </div>
                     <div class="sets-container">
                       <div *ngFor="let set of getSetsForExercise(workout.exerciseSets, exercise.id); let last = last" 

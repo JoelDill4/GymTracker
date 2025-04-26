@@ -373,5 +373,92 @@ namespace GymTracker.Server.Tests.Controllers
             // Assert
             Assert.IsType<NotFoundObjectResult>(result);
         }
+
+        [Fact]
+        public void AssignExerciseSetsOfExerciseToWorkout_ValidRequest_ReturnsOk()
+        {
+            // Arrange
+            var workoutId = Guid.NewGuid();
+            var exerciseId = Guid.NewGuid();
+            var exerciseSets = new List<ExerciseSetDto>
+            {
+                new ExerciseSetDto { order = 1, reps = 10, weight = 100, exerciseId = exerciseId },
+                new ExerciseSetDto { order = 2, reps = 8, weight = 110, exerciseId = exerciseId }
+            };
+
+            // Act
+            var result = _controller.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal("The exercise sets have been assigned to the exercise in the workout", okResult.Value);
+            _mockWorkoutManager.Verify(x => x.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets), Times.Once);
+        }
+
+        [Fact]
+        public void AssignExerciseSetsOfExerciseToWorkout_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var workoutId = Guid.NewGuid();
+            var exerciseId = Guid.NewGuid();
+            var exerciseSets = new List<ExerciseSetDto>();
+            _controller.ModelState.AddModelError("PropertyName", "Error message");
+
+            // Act
+            var result = _controller.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockWorkoutManager.Verify(x => x.AssignExerciseSetsOfExerciseToWorkout(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<List<ExerciseSetDto>>()), Times.Never);
+        }
+
+        [Fact]
+        public void AssignExerciseSetsOfExerciseToWorkout_WorkoutNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var workoutId = Guid.NewGuid();
+            var exerciseId = Guid.NewGuid();
+            var exerciseSets = new List<ExerciseSetDto>
+            {
+                new ExerciseSetDto { order = 1, reps = 10, weight = 100, exerciseId = exerciseId }
+            };
+
+            _mockWorkoutManager
+                .Setup(x => x.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets))
+                .Throws(new KeyNotFoundException("Workout not found"));
+
+            // Act
+            var result = _controller.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            Assert.Equal("Workout not found", notFoundResult.Value);
+            _mockWorkoutManager.Verify(x => x.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets), Times.Once);
+        }
+
+        [Fact]
+        public void AssignExerciseSetsOfExerciseToWorkout_ExceptionOccurs_ReturnsInternalServerError()
+        {
+            // Arrange
+            var workoutId = Guid.NewGuid();
+            var exerciseId = Guid.NewGuid();
+            var exerciseSets = new List<ExerciseSetDto>
+            {
+                new ExerciseSetDto { order = 1, reps = 10, weight = 100, exerciseId = exerciseId }
+            };
+
+            _mockWorkoutManager
+                .Setup(x => x.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets))
+                .Throws(new Exception("Unexpected error"));
+
+            // Act
+            var result = _controller.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets);
+
+            // Assert
+            var statusCodeResult = Assert.IsType<ObjectResult>(result);
+            Assert.Equal(500, statusCodeResult.StatusCode);
+            Assert.Equal("An error occurred while assigning the exercise sets to the exercise in the workout", statusCodeResult.Value);
+            _mockWorkoutManager.Verify(x => x.AssignExerciseSetsOfExerciseToWorkout(workoutId, exerciseId, exerciseSets), Times.Once);
+        }
     }
 } 

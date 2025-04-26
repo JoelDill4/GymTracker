@@ -6,24 +6,38 @@ import { Exercise } from '../models/exercise.model';
 import { ExerciseService } from '../services/exercise.service';
 import { BodyPartService } from '../../bodyParts/services/body-part.service';
 import { BodyPart } from '../../bodyParts/models/body-part.model';
-import { CreateExerciseComponent } from '../components/create-edit-exercise/create-edit-exercise.component'
+import { CreateExerciseComponent } from '../components/create-edit-exercise/create-edit-exercise.component';
+import { NewButtonComponent } from '../../../shared/components/new-button/new-button.component';
+import { ListCardComponent, FilterOption } from '../../../shared/components/list-card/list-card.component';
+import { EditButtonComponent } from '../../../shared/components/edit-button/edit-button.component';
+import { DeleteButtonComponent } from '../../../shared/components/delete-button/delete-button.component';
 
 @Component({
   selector: 'app-exercises',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, CreateExerciseComponent],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    FormsModule, 
+    CreateExerciseComponent, 
+    NewButtonComponent, 
+    ListCardComponent,
+    EditButtonComponent,
+    DeleteButtonComponent
+  ],
   templateUrl: './exercises.component.html',
   styleUrl: './exercises.component.css'
 })
 export class ExercisesComponent implements OnInit, AfterViewInit {
   exercises: Exercise[] = [];
+  filteredExercises: Exercise[] = [];
   bodyParts: BodyPart[] = [];
   loading = false;
   error: string | null = null;
   showCreateModal = false;
-  searchTerm = '';
-  selectedBodyPartId: string | null = null;
   selectedExercise: Exercise | null = null;
+  currentSearchTerm: string = '';
+  currentBodyPartId: string | null = null;
 
   constructor(
     private exerciseService: ExerciseService,
@@ -50,6 +64,8 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
       next: (data) => {
         console.log('Exercises loaded:', data);
         this.exercises = data;
+        this.filteredExercises = data;
+        this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
@@ -57,6 +73,16 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
         this.error = 'Failed to load exercises';
         this.loading = false;
       }
+    });
+  }
+
+  private applyFilters(): void {
+    this.filteredExercises = this.exercises.filter(exercise => {
+      const matchesSearch = !this.currentSearchTerm || 
+        exercise.name.toLowerCase().includes(this.currentSearchTerm.toLowerCase());
+      const matchesBodyPart = !this.currentBodyPartId || 
+        exercise.bodyPart.id === this.currentBodyPartId;
+      return matchesSearch && matchesBodyPart;
     });
   }
 
@@ -71,59 +97,14 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onSearch(): void {
-    console.log('Searching for:', this.searchTerm);
-    if (!this.searchTerm.trim()) {
-      this.loadExercises();
-      return;
-    }
-
-    this.loading = true;
-    this.error = null;
-    this.exerciseService.searchExercisesByName(this.searchTerm).subscribe({
-      next: (data) => {
-        console.log('Search results:', data);
-        this.exercises = data;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Search error:', error);
-        this.error = 'Failed to search exercises';
-        this.loading = false;
-      }
-    });
+  onSearch(searchTerm: string): void {
+    this.currentSearchTerm = searchTerm;
+    this.applyFilters();
   }
 
-  onBodyPartChange(): void {
-    if (!this.selectedBodyPartId) {
-      this.loadExercises();
-      return;
-    }
-
-    this.loading = true;
-    this.error = null;
-    this.exerciseService.getExercisesByBodyPart(this.selectedBodyPartId).subscribe({
-      next: (data) => {
-        this.exercises = data;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error filtering by body part:', error);
-        this.error = 'Failed to filter exercises by body part';
-        this.loading = false;
-      }
-    });
-  }
-
-  clearSearch(): void {
-    console.log('Clearing search');
-    this.searchTerm = '';
-    this.loadExercises();
-  }
-
-  clearBodyPartFilter(): void {
-    this.selectedBodyPartId = null;
-    this.loadExercises();
+  onFilter(bodyPartId: string | null): void {
+    this.currentBodyPartId = bodyPartId;
+    this.applyFilters();
   }
 
   onCreateExercise(): void {
@@ -172,4 +153,14 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
       });
     }
   }
+
+  getExerciseTitle = (exercise: Exercise): string => exercise.name;
+  getExerciseDescription = (exercise: Exercise): string | undefined => exercise.description;
+  getExerciseBadge = (exercise: Exercise): { text: string; icon?: string; routerLink?: any[] } | undefined => ({
+    text: exercise.bodyPart.name,
+    icon: 'bi-person-arms-up'
+  });
+  getExerciseRouterLink = (exercise: Exercise): any[] => [];
+  onExerciseClick = (exercise: Exercise): void => {
+  };
 } 

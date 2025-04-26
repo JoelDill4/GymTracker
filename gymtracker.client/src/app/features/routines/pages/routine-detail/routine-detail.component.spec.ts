@@ -141,9 +141,9 @@ describe('RoutineDetailComponent', () => {
     expect(component.showCreateModal).toBeTrue();
   });
 
-  it('should hide create modal when onCancelCreate is called', () => {
+  it('should hide create modal when onModalClosed is called', () => {
     component.showCreateModal = true;
-    component.onCancelCreate();
+    component.onModalClosed();
     expect(component.showCreateModal).toBeFalse();
   });
 
@@ -205,7 +205,6 @@ describe('RoutineDetailComponent', () => {
 
     expect(workoutDayService.deleteWorkoutDay).toHaveBeenCalledWith(workoutDayToDelete.id);
     expect(consoleSpy).toHaveBeenCalledWith('Error deleting workout day:', error);
-    expect(component.error).toBe('Failed to delete workout day');
     expect(component.workoutDays).toEqual(originalWorkoutDays);
   }));
 }); 

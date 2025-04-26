@@ -1,11 +1,12 @@
 <div class="container fade-in">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-5 fw-bold">
+    <h1 class="mb-0 fw-bold">
       <i class="bi bi-calendar-week me-2"></i>{{ routine?.name }}
     </h1>
-    <button class="btn btn-primary" (click)="onCreateWorkoutDay()">
-      <i class="bi bi-plus-lg me-2"></i>Create Workout Day
-    </button>
+    <app-new-button
+      text="New Workout Day"
+      (onClick)="onCreateWorkoutDay()">
+    </app-new-button>
   </div>
 
   <p class="lead text-muted mb-4" *ngIf="routine?.description">{{ routine?.description }}</p>
@@ -25,43 +26,31 @@
       <i class="bi bi-info-circle me-2"></i>No workout days found. Click the Create Workout Day button to add one.
     </div>
 
-    <div class="row g-4">
-      <div *ngFor="let workoutDay of workoutDays" class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <div>
-              <h5 class="card-title">
-                <i class="bi bi-calendar-check me-2"></i>{{ workoutDay.name }}
-              </h5>
-              <p class="card-text text-muted" *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
-            </div>
-            <div class="mt-auto">
-              <div class="mb-2">
-                <button class="btn btn-sm btn-outline-primary w-100" [routerLink]="['workout-days', workoutDay.id, 'exercises']">
-                  <i class="bi bi-eye me-1"></i>Details
-                </button>
-              </div>
-              <div class="d-flex">
-                <button class="btn btn-sm btn-outline-primary me-2 flex-grow-1" (click)="onEditWorkoutDay(workoutDay)">
-                  <i class="bi bi-pencil me-1"></i>Edit
-                </button>
-                <button class="btn btn-sm btn-outline-danger flex-grow-1" (click)="deleteWorkoutDay(workoutDay.id)">
-                  <i class="bi bi-trash me-1"></i>Delete
-                </button>
-              </div>
-            </div>
-          </div>
+    <app-list-card
+      [items]="workoutDays"
+      [showSearch]="false"
+      [showFilter]="false"
+      [icon]="'bi-calendar-check'"
+      [getItemTitle]="getWorkoutDayTitle"
+      [getItemDescription]="getWorkoutDayDescription"
+      [getItemBadge]="getWorkoutDayBadge"
+      [getItemRouterLink]="getWorkoutDayRouterLink"
+      (itemClick)="onWorkoutDayClick($event)">
+      <ng-template let-workoutDay>
+        <div class="d-flex gap-2">
+          <app-edit-button (onClick)="onEditWorkoutDay(workoutDay)"></app-edit-button>
+          <app-delete-button (onClick)="deleteWorkoutDay(workoutDay.id)"></app-delete-button>
         </div>
-      </div>
-    </div>
+      </ng-template>
+    </app-list-card>
   </div>
-
-  <app-create-edit-workout-day
-    *ngIf="showCreateModal && routine"
-    [routineId]="routine.id"
-    [workoutDayToEdit]="selectedWorkoutDay"
-    (cancel)="onCancelCreate()"
-    (created)="onWorkoutDayCreated($event)"
-    (updated)="onWorkoutDayUpdated($event)">
-  </app-create-edit-workout-day>
 </div>
+
+<app-create-edit-workout-day 
+  *ngIf="showCreateModal && routine" 
+  [workoutDayToEdit]="selectedWorkoutDay"
+  [routineId]="routine.id"
+  (cancel)="onModalClosed()" 
+  (created)="onWorkoutDayCreated($event)"
+  (updated)="onWorkoutDayUpdated($event)">
+</app-create-edit-workout-day>

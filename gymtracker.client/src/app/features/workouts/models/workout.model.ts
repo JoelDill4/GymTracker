@@ -5,7 +5,7 @@ export interface Workout {
     id: string;
     workoutDate: Date;
     observations: string;
-    workoutDay: WorkoutDay;
+    workoutDay?: WorkoutDay;
     exerciseSets: ExerciseSet[];
     createdAt: Date;
     updatedAt: Date;

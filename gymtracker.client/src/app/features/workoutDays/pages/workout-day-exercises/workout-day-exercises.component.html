@@ -1,103 +1,105 @@
-<div class="container mt-4" *ngIf="workoutDay">
-  <div class="row">
-    <div class="col-12 d-flex justify-content-between align-items-center">
-      <h2>{{ workoutDay.name }} - Exercises</h2>
-      <button class="btn btn-info" (click)="viewWorkouts()">
-        <i class="bi bi-calendar-check me-2"></i>
-        View Workouts
-      </button>
-    </div>
-    <div class="col-12">
-      <p *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
+<div class="container mt-4 fade-in" *ngIf="workoutDay">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="mb-0 fw-bold">
+        <i class="bi bi-calendar-check me-2"></i>{{ workoutDay.name }}
+      </h2>
+      <p class="lead text-muted mb-0" *ngIf="workoutDay.description">{{ workoutDay.description }}</p>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h3>Add Exercise</h3>
-        </div>
-        <div class="card-body">
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="bodyPartSelect" class="form-label">Filter by Body Part</label>
-              <select id="bodyPartSelect" class="form-select" [(ngModel)]="selectedBodyPartId" (ngModelChange)="onBodyPartChange()">
-                <option [ngValue]="null">All Body Parts</option>
-                <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">
-                  {{ bodyPart.name }}
-                </option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="exerciseSelect" class="form-label">Select Exercise</label>
-              <select id="exerciseSelect" class="form-select" [(ngModel)]="selectedExerciseId">
-                <option [ngValue]="null">Select an exercise</option>
-                <option *ngFor="let exercise of filteredExercises" [value]="exercise.id">
-                  {{ exercise.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-          <div class="row mt-3">
-            <div class="col-12 d-flex justify-content-center">
-              <button class="btn btn-primary w-25" (click)="onAddExercise()" [disabled]="!selectedExerciseId">
-                Add Exercise
-              </button>
-            </div>
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+      <h4 class="mb-0 fw-bold">
+        <i class="bi bi-plus-circle me-2"></i>Add Exercise
+      </h4>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="form-floating">
+            <select id="bodyPartSelect" 
+                    class="form-select" 
+                    [(ngModel)]="selectedBodyPartId" 
+                    (ngModelChange)="onBodyPartChange()">
+              <option [ngValue]="null">All Body Parts</option>
+              <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">
+                {{ bodyPart.name }}
+              </option>
+            </select>
+            <label for="bodyPartSelect">Filter by Body Part</label>
           </div>
         </div>
+        <div class="col-md-6">
+          <div class="form-floating">
+            <select id="exerciseSelect" 
+                    class="form-select" 
+                    [(ngModel)]="selectedExerciseId">
+              <option [ngValue]="null">Select an exercise</option>
+              <option *ngFor="let exercise of filteredExercises" [value]="exercise.id">
+                {{ exercise.name }}
+              </option>
+            </select>
+            <label for="exerciseSelect">Select Exercise</label>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <button class="btn btn-primary px-4" 
+                (click)="onAddExercise()" 
+                [disabled]="!selectedExerciseId">
+          <i class="bi bi-plus-lg me-2"></i>Add Exercise
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h3>Current Exercises</h3>
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 fw-bold">
+        <i class="bi bi-list-task me-2"></i>Current Exercises
+      </h4>
+      <span class="badge bg-primary">{{ exercises.length }} Exercises</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div *ngIf="exercises.length === 0" class="col-12">
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox-fill fs-1 mb-3"></i>
+            <h5>No exercises added yet</h5>
+            <p class="text-muted mb-0">Start by adding exercises from the selection above</p>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Body Part</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let exercise of exercises">
-                  <td>{{ exercise.name }}</td>
-                  <td>{{ exercise.description }}</td>
-                  <td>{{ exercise.bodyPart.name }}</td>
-                  <td>
-                    <button class="btn btn-danger btn-sm" (click)="onRemoveExercise(exercise.id)">
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-                <tr *ngIf="exercises.length === 0">
-                  <td colspan="4" class="text-center">No exercises added yet</td>
-                </tr>
-              </tbody>
-            </table>
+        
+        <div *ngFor="let exercise of exercises" class="col-md-6">
+          <div class="exercise-card p-3 border rounded-3 bg-light position-relative">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0 fw-bold">{{ exercise.name }}</h5>
+              <app-delete-button (onClick)="onRemoveExercise(exercise.id)"></app-delete-button>
+            </div>
+            <span class="badge bg-primary mb-2">
+              <i class="bi bi-person-arms-up me-1"></i>{{ exercise.bodyPart.name }}
+            </span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Action Buttons -->
   <div class="row mt-4">
     <div class="col-6">
       <div class="d-flex justify-content-center">
-        <button class="btn btn-secondary px-5" (click)="onCancel()">Cancel</button>
+        <button class="btn btn-secondary px-5 action-btn w-sm-100 mb-2 mb-md-0" (click)="onCancel()">
+          <i class="bi bi-arrow-left me-2"></i>Cancel
+        </button>
       </div>
     </div>
     <div class="col-6">
       <div class="d-flex justify-content-center">
-        <button class="btn btn-primary px-5" (click)="onSaveExercises()">Save Exercises</button>
+        <button class="btn btn-primary px-5 action-btn w-sm-100" (click)="onSaveExercises()">
+          <i class="bi bi-check-lg me-2"></i>Save Exercises
+        </button>
       </div>
     </div>
   </div>

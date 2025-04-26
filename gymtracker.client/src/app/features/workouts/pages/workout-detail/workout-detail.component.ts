@@ -8,11 +8,20 @@ import { WorkoutDayService } from '../../../workoutDays/services/workoutday.serv
 import { Exercise } from '../../../exercises/models/exercise.model';
 import { CreateEditWorkoutComponent } from '../../components/create-workout/create-edit-workout.component';
 import { ExerciseSet } from '../../../exercisesSets/models/exercise-set.model';
+import { NewButtonComponent } from '../../../../shared/components/new-button/new-button.component';
+import { EditButtonComponent } from '../../../../shared/components/edit-button/edit-button.component';
+import { DeleteButtonComponent } from '../../../../shared/components/delete-button/delete-button.component';
 
 @Component({
   selector: 'app-workout-detail',
   standalone: true,
-  imports: [CommonModule, CreateEditWorkoutComponent],
+  imports: [
+    CommonModule, 
+    CreateEditWorkoutComponent, 
+    NewButtonComponent,
+    EditButtonComponent,
+    DeleteButtonComponent
+  ],
   templateUrl: './workout-detail.component.html'
 })
 export class WorkoutDetailComponent implements OnInit {
@@ -39,7 +48,23 @@ export class WorkoutDetailComponent implements OnInit {
       this.loadWorkoutDay();
       this.loadWorkouts();
       this.loadExercises();
+    } else {
+      this.loadAllWorkouts();
     }
+  }
+
+  loadAllWorkouts(): void {
+    this.loading = true;
+    this.workoutService.getWorkouts().subscribe({
+      next: (workouts) => {
+        this.workouts = workouts;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load workouts';
+        this.loading = false;
+      }
+    });
   }
 
   getUniqueExercises(exerciseSets: ExerciseSet[]): Exercise[] {
@@ -70,17 +95,22 @@ export class WorkoutDetailComponent implements OnInit {
   }
 
   loadWorkouts(): void {
+    this.loading = true;
     this.workoutService.getWorkoutsByWorkoutDay(this.workoutDayId).subscribe({
       next: (workouts) => {
         this.workouts = workouts;
+        this.loading = false;
       },
       error: (err) => {
         this.error = err.error?.message || 'Failed to load workouts';
+        this.loading = false;
       }
     });
   }
 
   loadExercises(): void {
+    if (!this.workoutDayId) return;
+    
     this.workoutDayService.getExercisesByWorkoutDay(this.workoutDayId).subscribe({
       next: (exercises) => {
         this.exercises = exercises;
@@ -97,18 +127,25 @@ export class WorkoutDetailComponent implements OnInit {
   }
 
   onWorkoutCreated(workout: Workout): void {
-    this.workouts = [...this.workouts, workout];
     this.showCreateModal = false;
+    if (this.workoutDayId) {
+      this.loadWorkouts();
+      this.loadExercises();
+    } else {
+      this.loadAllWorkouts();
+    }
   }
 
   onWorkoutUpdated(workout: Workout): void {
-    const index = this.workouts.findIndex(w => w.id === workout.id);
-    if (index !== -1) {
-      this.workouts[index] = workout;
-    }
     this.showCreateModal = false;
     this.workoutToEdit = undefined;
     this.exerciseToEdit = undefined;
+    if (this.workoutDayId) {
+      this.loadWorkouts();
+      this.loadExercises();
+    } else {
+      this.loadAllWorkouts();
+    }
   }
 
   editWorkout(workoutId: string): void {
@@ -123,7 +160,11 @@ export class WorkoutDetailComponent implements OnInit {
     if (confirm('Are you sure you want to delete this workout?')) {
       this.workoutService.deleteWorkout(workoutId).subscribe({
         next: () => {
-          this.workouts = this.workouts.filter(w => w.id !== workoutId);
+          if (this.workoutDayId) {
+            this.loadWorkouts();
+          } else {
+            this.loadAllWorkouts();
+          }
         },
         error: (err) => {
           this.error = err.error?.message || 'Failed to delete workout';
@@ -148,6 +189,10 @@ export class WorkoutDetailComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/workout-days', this.workoutDayId, 'exercises']);
+    if (this.workoutDayId) {
+      this.router.navigate(['/workout-days', this.workoutDayId, 'exercises']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 } 

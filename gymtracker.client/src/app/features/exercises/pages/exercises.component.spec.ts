@@ -7,6 +7,7 @@ import { CreateExerciseComponent } from '../components/create-edit-exercise/crea
 import { of, throwError } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { BodyPartService } from '../../bodyParts/services/body-part.service';
+import { ActivatedRoute } from '@angular/router';
 
 describe('ExercisesComponent', () => {
   let component: ExercisesComponent;
@@ -85,7 +86,13 @@ describe('ExercisesComponent', () => {
       ],
       providers: [
         { provide: ExerciseService, useValue: exerciseSpy },
-        { provide: BodyPartService, useValue: bodyPartSpy }
+        { provide: BodyPartService, useValue: bodyPartSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({})
+          }
+        }
       ]
     }).compileComponents();
 
@@ -96,6 +103,9 @@ describe('ExercisesComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ExercisesComponent);
     component = fixture.componentInstance;
+    component.exercises = [...mockExercises];
+    component.filteredExercises = [...mockExercises];
+    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -103,10 +113,14 @@ describe('ExercisesComponent', () => {
   });
 
   it('should initialize with empty exercises array and loading false', () => {
-    expect(component.exercises).toEqual([]);
-    expect(component.loading).toBeFalse();
-    expect(component.error).toBeNull();
-    expect(component.showCreateModal).toBeFalse();
+    const newComponent = new ExercisesComponent(
+      exerciseService,
+      bodyPartService
+    );
+    expect(newComponent.exercises).toEqual([]);
+    expect(newComponent.loading).toBeFalse();
+    expect(newComponent.error).toBeNull();
+    expect(newComponent.showCreateModal).toBeFalse();
   });
 
   it('should load exercises on init', fakeAsync(() => {
@@ -121,6 +135,8 @@ describe('ExercisesComponent', () => {
 
   it('should handle error when loading exercises fails', fakeAsync(() => {
     exerciseService.getExercises.and.returnValue(throwError(() => new Error('Failed to load')));
+    component.exercises = [];
+    component.filteredExercises = [];
 
     component.ngOnInit();
     tick();
@@ -132,68 +148,68 @@ describe('ExercisesComponent', () => {
   }));
 
   it('should search exercises by name', fakeAsync(() => {
-    component.searchTerm = 'Bench';
-    component.onSearch();
+    component.onSearch('Bench');
     tick();
 
-    expect(exerciseService.searchExercisesByName).toHaveBeenCalledWith('Bench');
-    expect(component.exercises).toEqual(mockExercises);
+    expect(component.currentSearchTerm).toBe('Bench');
+    expect(component.filteredExercises).toEqual(mockExercises.filter(e => e.name.toLowerCase().includes('bench')));
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   }));
 
   it('should handle error when searching exercises fails', fakeAsync(() => {
     exerciseService.searchExercisesByName.and.returnValue(throwError(() => new Error('Failed to search')));
+    component.exercises = [];
+    component.filteredExercises = [];
 
-    component.searchTerm = 'Bench';
-    component.onSearch();
+    component.onSearch('Bench');
     tick();
 
-    expect(exerciseService.searchExercisesByName).toHaveBeenCalledWith('Bench');
+    expect(component.currentSearchTerm).toBe('Bench');
     expect(component.exercises).toEqual([]);
     expect(component.loading).toBeFalse();
-    expect(component.error).toBe('Failed to search exercises');
+    expect(component.error).toBeNull();
   }));
 
   it('should clear search and reload all exercises', fakeAsync(() => {
-    component.searchTerm = 'Bench';
-    component.clearSearch();
+    component.onSearch('Bench');
+    component.onSearch('');
     tick();
 
-    expect(component.searchTerm).toBe('');
-    expect(exerciseService.getExercises).toHaveBeenCalled();
+    expect(component.currentSearchTerm).toBe('');
+    expect(component.filteredExercises).toEqual(mockExercises);
   }));
 
   it('should filter exercises by body part', fakeAsync(() => {
-    component.selectedBodyPartId = '1';
-    component.onBodyPartChange();
+    component.onFilter('1');
     tick();
 
-    expect(exerciseService.getExercisesByBodyPart).toHaveBeenCalledWith('1');
-    expect(component.exercises).toEqual(mockExercises);
+    expect(component.currentBodyPartId).toBe('1');
+    expect(component.filteredExercises).toEqual(mockExercises.filter(e => e.bodyPart.id === '1'));
     expect(component.loading).toBeFalse();
     expect(component.error).toBeNull();
   }));
 
   it('should handle error when filtering by body part fails', fakeAsync(() => {
     exerciseService.getExercisesByBodyPart.and.returnValue(throwError(() => new Error('Failed to filter')));
+    component.exercises = [];
+    component.filteredExercises = [];
 
-    component.selectedBodyPartId = '1';
-    component.onBodyPartChange();
+    component.onFilter('1');
     tick();
 
-    expect(exerciseService.getExercisesByBodyPart).toHaveBeenCalledWith('1');
+    expect(component.currentBodyPartId).toBe('1');
     expect(component.exercises).toEqual([]);
     expect(component.loading).toBeFalse();
-    expect(component.error).toBe('Failed to filter exercises by body part');
+    expect(component.error).toBeNull();
   }));
 
   it('should clear body part filter and reload all exercises', fakeAsync(() => {
-    component.selectedBodyPartId = '1';
-    component.clearBodyPartFilter();
+    component.onFilter('1');
+    component.onFilter(null);
     tick();
 
-    expect(component.selectedBodyPartId).toBeNull();
-    expect(exerciseService.getExercises).toHaveBeenCalled();
+    expect(component.currentBodyPartId).toBeNull();
+    expect(component.filteredExercises).toEqual(mockExercises);
   }));
 });
