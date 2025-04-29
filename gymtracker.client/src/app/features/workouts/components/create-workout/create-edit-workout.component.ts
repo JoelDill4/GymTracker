@@ -5,6 +5,9 @@ import { Workout } from '../../models/workout.model';
 import { WorkoutService } from '../../services/workout.service';
 import { Exercise } from '../../../exercises/models/exercise.model';
 import { ExerciseSet } from '../../../exercisesSets/models/exercise-set.model';
+import { Routine } from '../../../routines/models/routine.model';
+import { WorkoutDay } from '../../../workoutDays/models/workoutday.model';
+import { RoutineService } from '../../../routines/services/routine.service';
 
 @Component({
   selector: 'app-create-edit-workout',
@@ -14,7 +17,7 @@ import { ExerciseSet } from '../../../exercisesSets/models/exercise-set.model';
   styleUrl: './create-edit-workout.component.css'
 })
 export class CreateEditWorkoutComponent implements OnChanges {
-  @Input() workoutDayId!: string;
+  @Input() workoutDayId?: string;
   @Input() exercises: Exercise[] = []; 
   @Input() workoutToEdit?: Workout;
   @Input() singleExerciseId?: string;
@@ -36,7 +39,66 @@ export class CreateEditWorkoutComponent implements OnChanges {
   exerciseSets: { [key: string]: ExerciseSet[] } = {};
   numberOfSets: { [key: string]: number } = {};
 
-  constructor(private workoutService: WorkoutService) {
+  isRoutineRelated = false;
+  routines: Routine[] = [];
+  selectedRoutineId?: string;
+  workoutDays: WorkoutDay[] = [];
+  selectedWorkoutDayId?: string;
+  showRoutineError = false;
+  showWorkoutDayError = false;
+
+  constructor(
+    private workoutService: WorkoutService,
+    private routineService: RoutineService
+  ) {
+
+    if (!this.workoutDayId) {
+      this.loadRoutines();
+    }
+  }
+
+  private loadRoutines(): void {
+    this.routineService.getRoutines().subscribe({
+      next: (routines) => {
+        this.routines = routines;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load routines';
+      }
+    });
+  }
+
+  onRoutineChange(event: Event): void {
+    if (this.isEditMode) return;
+
+    const select = event.target as HTMLSelectElement;
+    const routineId = select.value;
+    this.selectedRoutineId = routineId;
+    this.selectedWorkoutDayId = undefined;
+    this.workoutDays = [];
+    
+    if (routineId) {
+      this.routineService.getWorkoutDaysByRoutine(routineId).subscribe({
+        next: (workoutDays) => {
+          this.workoutDays = workoutDays;
+        },
+        error: (err) => {
+          this.error = err.error?.message || 'Failed to load workout days';
+        }
+      });
+    }
+  }
+
+  onWorkoutDayChange(event: Event): void {
+    if (this.isEditMode) return;
+
+    const select = event.target as HTMLSelectElement;
+    const workoutDayId = select.value;
+    this.selectedWorkoutDayId = workoutDayId;
+
+    this.exercises = [];
+    this.updateTotalSteps();
+    this.initializeExerciseSets();
   }
 
   getFormattedDate(): string {
@@ -58,10 +120,29 @@ export class CreateEditWorkoutComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['workoutDayId'] && this.workoutDayId) {
+      this.selectedWorkoutDayId = this.workoutDayId;
+    }
+
     if (changes['workoutToEdit'] && this.workoutToEdit) {
       this.isEditMode = true;
       this.totalSteps = 1;
       this.workout = { ...this.workoutToEdit };
+
+      if (this.workoutToEdit.workoutDay) {
+        this.isRoutineRelated = true;
+        this.selectedRoutineId = this.workoutToEdit.workoutDay.routine.id;
+        this.selectedWorkoutDayId = this.workoutToEdit.workoutDay.id;
+
+        this.routineService.getWorkoutDaysByRoutine(this.selectedRoutineId).subscribe({
+          next: (workoutDays) => {
+            this.workoutDays = workoutDays;
+          },
+          error: (err) => {
+            this.error = err.error?.message || 'Failed to load workout days';
+          }
+        });
+      }
 
       const workoutExerciseIds = this.workoutToEdit.exerciseSets.map(set => set.exercise.id);
       const allExerciseIds = Array.from(new Set([
@@ -169,13 +250,27 @@ export class CreateEditWorkoutComponent implements OnChanges {
   }
 
   onSubmit(): void {
-    if (!this.workout.workoutDate || !this.workoutDayId) {
-      this.error = 'Workout date and workout day are required';
+    if (!this.workout.workoutDate) {
+      this.error = 'Workout date is required';
       return;
+    }
+
+    if (this.isRoutineRelated) {
+      if (!this.selectedRoutineId) {
+        this.showRoutineError = true;
+        return;
+      }
+      if (!this.selectedWorkoutDayId) {
+        this.showWorkoutDayError = true;
+        return;
+      }
     }
 
     this.loading = true;
     this.error = '';
+    this.showRoutineError = false;
+    this.showWorkoutDayError = false;
+
     if (this.isEditMode && this.workoutToEdit) {
       if (this.singleExerciseId) {
         this.workoutService.assignExerciseSetsOfExerciseToWorkout(
@@ -198,7 +293,7 @@ export class CreateEditWorkoutComponent implements OnChanges {
         this.workoutService.updateWorkout(this.workoutToEdit.id, {
           workoutDate: this.workout.workoutDate,
           observations: this.workout.observations || '',
-          workoutDayId: this.workoutDayId
+          workoutDayId: this.isRoutineRelated ? this.selectedWorkoutDayId : undefined
         }).subscribe({
           next: (updatedWorkout) => {
             this.loading = false;
@@ -215,7 +310,7 @@ export class CreateEditWorkoutComponent implements OnChanges {
       this.workoutService.createWorkout({
         workoutDate: this.workout.workoutDate,
         observations: this.workout.observations || '',
-        workoutDayId: this.workoutDayId
+        workoutDayId: this.isRoutineRelated ? this.selectedWorkoutDayId : undefined
       }).subscribe({
         next: (createdWorkout) => {
           const exerciseSetPromises = Object.values(this.exerciseSets)

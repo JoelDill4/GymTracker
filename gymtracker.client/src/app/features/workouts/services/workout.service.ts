@@ -24,7 +24,7 @@ export class WorkoutService {
     return this.http.get<Workout[]>(`${this.apiUrl}/workoutday/${workoutDayId}`);
   }
 
-  createWorkout(workout: Pick<Workout, 'workoutDate' | 'observations'> & { workoutDayId: string }): Observable<Workout> {
+  createWorkout(workout: Pick<Workout, 'workoutDate' | 'observations'> & { workoutDayId?: string }): Observable<Workout> {
     return this.http.post<Workout>(this.apiUrl, {
       workoutDate: workout.workoutDate,
       observations: workout.observations,
@@ -32,7 +32,7 @@ export class WorkoutService {
     });
   }
 
-  updateWorkout(id: string, workout: Pick<Workout, 'workoutDate' | 'observations'> & { workoutDayId: string }): Observable<Workout> {
+  updateWorkout(id: string, workout: Pick<Workout, 'workoutDate' | 'observations'> & { workoutDayId?: string }): Observable<Workout> {
     return this.http.put<Workout>(`${this.apiUrl}/${id}`, {
       workoutDate: workout.workoutDate,
       observations: workout.observations,
