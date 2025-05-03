@@ -1,0 +1,43 @@
+<div class="progression-chart-container">
+  <div class="progression-card">
+    <div class="filters-row">
+      <div class="filters">
+        <label>
+          Exercise:
+          <select [(ngModel)]="selectedExercise">
+            <option value="" disabled selected>Select exercise</option>
+            <option *ngFor="let ex of exercises" [value]="ex.id">{{ ex.name }}</option>
+          </select>
+        </label>
+        <label>
+          From:
+          <input type="date" [(ngModel)]="startDate">
+        </label>
+        <label>
+          To:
+          <input type="date" [(ngModel)]="endDate">
+        </label>
+      </div>
+      <button class="refresh-button" (click)="refreshData()">
+        <i class="bi bi-arrow-clockwise"></i>
+        Refresh
+      </button>
+    </div>
+    <div class="chart-placeholder">
+      <div *ngIf="loading" class="loading">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div *ngIf="!loading && !selectedExercise" class="empty">Select an exercise to see progression</div>
+      <div *ngIf="!loading && selectedExercise">
+        <apx-chart
+          [series]="chartSeries"
+          [chart]="chartDetails"
+          [xaxis]="chartXAxis"
+          [title]="chartTitle">
+        </apx-chart>
+      </div>
+    </div>
+  </div>
+</div> 

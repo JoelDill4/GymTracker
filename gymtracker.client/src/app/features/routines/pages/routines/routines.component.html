@@ -11,6 +11,9 @@
 
   <app-list-card
     [items]="routines"
+    [loading]="loading"
+    [error]="error"
+    [emptyMessage]="'No routines found. Click the New Routine button to add one.'"
     [showSearch]="false"
     [showFilter]="false"
     [icon]="'bi-calendar-week'"
@@ -25,10 +28,6 @@
       </div>
     </ng-template>
   </app-list-card>
-
-  <div *ngIf="routines.length === 0" class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>No routines found. Click the New Routine button to add one.
-  </div>
 </div>
 
 <app-create-edit-routine 

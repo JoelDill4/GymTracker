@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container fade-in">
   <div class="row mb-4">
     <div class="col-12 d-flex justify-content-between align-items-center">
       <h2 class="mb-0 fw-bold">
@@ -21,7 +21,7 @@
   <div class="row">
     <div class="col-12">
       <div *ngIf="error" class="alert alert-danger">
-        {{ error }}
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
       </div>
 
       <div *ngIf="loading" class="text-center py-5">
@@ -30,60 +30,62 @@
         </div>
       </div>
 
-      <div *ngIf="!loading && workouts.length === 0" class="alert alert-info">
-        No workouts found.
-      </div>
+      <div *ngIf="!loading && !error">
+        <div *ngIf="workouts.length === 0" class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>No workouts found.
+        </div>
 
-      <div *ngFor="let workout of workouts" class="card shadow-sm mb-4 border-0">
-        <div class="card-header bg-light py-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0 fw-bold">{{ workout.workoutDate | date:'mediumDate' }}</h5>
-            <div class="d-flex gap-2">
-              <app-edit-button (onClick)="editWorkout(workout.id)"></app-edit-button>
-              <app-delete-button (onClick)="deleteWorkout(workout.id)"></app-delete-button>
+        <div *ngFor="let workout of workouts" class="card shadow-sm mb-4 border-0">
+          <div class="card-header bg-light py-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0 fw-bold">{{ workout.workoutDate | date:'mediumDate' }}</h5>
+              <div class="d-flex gap-2">
+                <app-edit-button (onClick)="editWorkout(workout.id)"></app-edit-button>
+                <app-delete-button (onClick)="deleteWorkout(workout.id)"></app-delete-button>
+              </div>
+            </div>
+            <div *ngIf="!workoutDay && workout.workoutDay" class="text-muted small">
+              {{ workout.workoutDay.name }}
             </div>
           </div>
-          <div *ngIf="!workoutDay && workout.workoutDay" class="text-muted small">
-            {{ workout.workoutDay.name }}
-          </div>
-        </div>
-        <div class="card-body">
-          <p *ngIf="workout.observations" class="card-text text-muted fst-italic mb-4">{{ workout.observations }}</p>
-          
-          <div class="exercise-sets">
-            <div class="row g-4">
-              <ng-container *ngFor="let exercise of getUniqueExercises(workout.exerciseSets)">
-                <div class="col-md-6">
-                  <div class="exercise-group bg-white border rounded-3 p-3 h-100">
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                      <h6 class="mb-0 fw-bold">{{ exercise.name }}</h6>
-                      <app-edit-button (onClick)="editExerciseSets(workout.id, exercise.id)"></app-edit-button>
-                    </div>
-                    <div class="sets-container">
-                      <div *ngFor="let set of getSetsForExercise(workout.exerciseSets, exercise.id); let last = last" 
-                           class="set-item" 
-                           [class.mb-2]="!last"
-                           [class.pb-2]="!last"
-                           [class.border-bottom]="!last">
-                        <div class="row align-items-center">
-                          <div class="col-6 border-end">
-                            <div class="d-flex align-items-baseline">
-                              <strong class="text-primary me-2">Reps:</strong>
-                              <span>{{ set.reps }}</span>
+          <div class="card-body">
+            <p *ngIf="workout.observations" class="card-text text-muted fst-italic mb-4">{{ workout.observations }}</p>
+            
+            <div class="exercise-sets">
+              <div class="row g-4">
+                <ng-container *ngFor="let exercise of getUniqueExercises(workout.exerciseSets)">
+                  <div class="col-md-6">
+                    <div class="exercise-group bg-white border rounded-3 p-3 h-100">
+                      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <h6 class="mb-0 fw-bold">{{ exercise.name }}</h6>
+                        <app-edit-button (onClick)="editExerciseSets(workout.id, exercise.id)"></app-edit-button>
+                      </div>
+                      <div class="sets-container">
+                        <div *ngFor="let set of getSetsForExercise(workout.exerciseSets, exercise.id); let last = last" 
+                             class="set-item" 
+                             [class.mb-2]="!last"
+                             [class.pb-2]="!last"
+                             [class.border-bottom]="!last">
+                          <div class="row align-items-center">
+                            <div class="col-6 border-end">
+                              <div class="d-flex align-items-baseline">
+                                <strong class="text-primary me-2">Reps:</strong>
+                                <span>{{ set.reps }}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div class="col-6">
-                            <div class="d-flex align-items-baseline">
-                              <strong class="text-primary me-2">Weight:</strong>
-                              <span>{{ set.weight }}kg</span>
+                            <div class="col-6">
+                              <div class="d-flex align-items-baseline">
+                                <strong class="text-primary me-2">Weight:</strong>
+                                <span>{{ set.weight }}kg</span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </ng-container>
+                </ng-container>
+              </div>
             </div>
           </div>
         </div>

@@ -62,24 +62,40 @@ export interface FilterOption {
         </div>
       </div>
 
-      <div class="row g-4">
-        <div *ngFor="let item of items" class="col-md-6 col-lg-4">
-          <div class="card h-100" (click)="onCardClick($event, item)">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title mb-3">
-                <i [class]="'bi ' + icon + ' me-2'"></i>{{ getItemTitle(item) }}
-              </h5>
-              <div class="flex-grow-1">
-                <p class="card-text text-muted mb-0" *ngIf="getItemDescription(item)">{{ getItemDescription(item) }}</p>
-              </div>
-              <div class="d-flex align-items-center mt-3 pt-3 border-top">
-                <ng-container *ngIf="getItemBadge(item)">
-                  <span class="badge bg-primary" (click)="onBadgeClick($event, item)" [style.cursor]="getItemBadge(item)?.routerLink ? 'pointer' : 'default'">
-                    <i [class]="'bi ' + getItemBadge(item)?.icon + ' me-1'" *ngIf="getItemBadge(item)?.icon"></i>{{ getItemBadge(item)?.text }}
-                  </span>
-                </ng-container>
-                <div class="ms-auto action-buttons">
-                  <ng-container *ngTemplateOutlet="actionButtons; context: { $implicit: item }"></ng-container>
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+      </div>
+
+      <div *ngIf="!loading && !error">
+        <div *ngIf="items.length === 0" class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>{{ emptyMessage }}
+        </div>
+
+        <div class="row g-4" *ngIf="items.length > 0">
+          <div *ngFor="let item of items" class="col-md-6 col-lg-4">
+            <div class="card h-100" (click)="onCardClick($event, item)">
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title mb-3">
+                  <i [class]="'bi ' + icon + ' me-2'"></i>{{ getItemTitle(item) }}
+                </h5>
+                <div class="flex-grow-1">
+                  <p class="card-text text-muted mb-0" *ngIf="getItemDescription(item)">{{ getItemDescription(item) }}</p>
+                </div>
+                <div class="d-flex align-items-center mt-3 pt-3 border-top">
+                  <ng-container *ngIf="getItemBadge(item)">
+                    <span class="badge bg-primary" (click)="onBadgeClick($event, item)" [style.cursor]="getItemBadge(item)?.routerLink ? 'pointer' : 'default'">
+                      <i [class]="'bi ' + getItemBadge(item)?.icon + ' me-1'" *ngIf="getItemBadge(item)?.icon"></i>{{ getItemBadge(item)?.text }}
+                    </span>
+                  </ng-container>
+                  <div class="ms-auto action-buttons">
+                    <ng-container *ngTemplateOutlet="actionButtons; context: { $implicit: item }"></ng-container>
+                  </div>
                 </div>
               </div>
             </div>
@@ -152,6 +168,9 @@ export class ListCardComponent<T> {
   @Input() getItemDescription: (item: T) => string | undefined = () => undefined;
   @Input() getItemBadge: (item: T) => { text: string; icon?: string; routerLink?: any[] } | undefined = () => undefined;
   @Input() getItemRouterLink: (item: T) => any[] = () => [];
+  @Input() loading = false;
+  @Input() error: string | null = null;
+  @Input() emptyMessage = 'No items found.';
 
   @Output() search = new EventEmitter<string>();
   @Output() filter = new EventEmitter<string | null>();

@@ -28,6 +28,8 @@ export class RoutinesComponent implements OnInit {
   routines: Routine[] = [];
   showCreateModal = false;
   routineToEdit?: Routine;
+  loading = false;
+  error: string | null = null;
 
   constructor(private routineService: RoutineService) {}
 
@@ -36,12 +38,17 @@ export class RoutinesComponent implements OnInit {
   }
 
   loadRoutines(): void {
+    this.loading = true;
+    this.error = null;
     this.routineService.getRoutines().subscribe({
       next: (routines) => {
         this.routines = routines;
+        this.loading = false;
       },
       error: (error) => {
         console.error('Error loading routines:', error);
+        this.error = 'Failed to load routines';
+        this.loading = false;
       }
     });
   }

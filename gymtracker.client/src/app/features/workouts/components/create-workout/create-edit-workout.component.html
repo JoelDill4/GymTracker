@@ -24,15 +24,13 @@
               <label>Related to a routine?</label>
               <div class="d-flex gap-3">
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="isRoutineRelated" id="routineYes" 
-                         [value]="true" [(ngModel)]="isRoutineRelated"
-                         [disabled]="isEditMode">
+                  <input class="form-check-input" type="radio" name="isRoutineRelated" id="routineYes"
+                         [value]="true" [(ngModel)]="isRoutineRelated" [disabled]="isEditMode">
                   <label class="form-check-label" for="routineYes">Yes</label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="radio" name="isRoutineRelated" id="routineNo" 
-                         [value]="false" [(ngModel)]="isRoutineRelated"
-                         [disabled]="isEditMode">
+                  <input class="form-check-input" type="radio" name="isRoutineRelated" id="routineNo"
+                         [value]="false" [(ngModel)]="isRoutineRelated" [disabled]="isEditMode">
                   <label class="form-check-label" for="routineNo">No</label>
                 </div>
               </div>
@@ -40,7 +38,7 @@
 
             <div class="form-group mt-3" *ngIf="isRoutineRelated">
               <label for="routine">Routine <span class="text-danger">*</span></label>
-              <select id="routine" class="form-control" [(ngModel)]="selectedRoutineId" 
+              <select id="routine" class="form-control" [(ngModel)]="selectedRoutineId"
                       (change)="onRoutineChange($event)" required
                       [disabled]="isEditMode">
                 <option value="">Select a routine</option>
@@ -51,9 +49,9 @@
               </div>
             </div>
 
-            <div class="form-group mt-3" *ngIf="selectedRoutineId">
+            <div class="form-group mt-3" *ngIf="isRoutineRelated && selectedRoutineId">
               <label for="workoutDay">Workout Day <span class="text-danger">*</span></label>
-              <select id="workoutDay" class="form-control" [(ngModel)]="selectedWorkoutDayId" 
+              <select id="workoutDay" class="form-control" [(ngModel)]="selectedWorkoutDayId"
                       (change)="onWorkoutDayChange($event)" required
                       [disabled]="isEditMode">
                 <option value="">Select a workout day</option>
@@ -66,7 +64,38 @@
           </ng-container>
         </div>
 
-        <div *ngIf="currentStep > 1" class="step-container">
+        <div *ngIf="!isRoutineRelated && +currentStep === 2" class="step-container">
+          <div class="form-group mt-3">
+            <label>Select Exercises <span class="text-danger">*</span></label>
+            <div class="mb-2">
+              <small>Select at least one exercise to add to this workout.</small>
+            </div>
+            <div class="row mb-2">
+              <div class="col-md-6 mb-2 mb-md-0">
+                <input type="text" class="form-control" placeholder="Filter by name..." [(ngModel)]="filterName">
+              </div>
+              <div class="col-md-6">
+                <select class="form-control" [(ngModel)]="filterBodyPartId">
+                  <option value="">All body parts</option>
+                  <option *ngFor="let bodyPart of bodyParts" [value]="bodyPart.id">{{ bodyPart.name }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="list-group" style="max-height: 300px; overflow-y: auto;">
+              <label *ngFor="let exercise of filteredExercises" class="list-group-item">
+                <input type="checkbox"
+                       [checked]="selectedExerciseIds.includes(exercise.id)"
+                       (change)="onExerciseCheckboxChange($event, exercise.id)">
+                {{ exercise.name }}
+              </label>
+            </div>
+            <div class="text-danger mt-1" *ngIf="showExerciseError">
+              <small>Please select at least one exercise</small>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="currentStep > 1 && (isRoutineRelated || (!isRoutineRelated && currentStep !== 2))" class="step-container">
           <h4>{{ getCurrentExercise()?.name }}</h4>
           
           <div class="form-group">

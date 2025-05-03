@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Workout } from '../models/workout.model';
 import { ExerciseSet } from '../../exercisesSets/models/exercise-set.model';
@@ -22,6 +22,17 @@ export class WorkoutService {
 
   getWorkoutsByWorkoutDay(workoutDayId: string): Observable<Workout[]> {
     return this.http.get<Workout[]>(`${this.apiUrl}/workoutday/${workoutDayId}`);
+  }
+
+  getWorkoutsByDateRange(initDate?: string, endDate?: string): Observable<Workout[]> {
+    let params = new HttpParams();
+    if (initDate) {
+      params = params.set('startDate', initDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+    return this.http.get<Workout[]>(`${this.apiUrl}/daterange`, { params });
   }
 
   createWorkout(workout: Pick<Workout, 'workoutDate' | 'observations'> & { workoutDayId?: string }): Observable<Workout> {

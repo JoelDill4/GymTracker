@@ -8,6 +8,10 @@ import { ExerciseSet } from '../../../exercisesSets/models/exercise-set.model';
 import { Routine } from '../../../routines/models/routine.model';
 import { WorkoutDay } from '../../../workoutDays/models/workoutday.model';
 import { RoutineService } from '../../../routines/services/routine.service';
+import { WorkoutDayService } from '../../../workoutDays/services/workoutday.service';
+import { ExerciseService } from '../../../exercises/services/exercise.service';
+import { BodyPart } from '../../../bodyParts/models/body-part.model';
+import { BodyPartService } from '../../../bodyParts/services/body-part.service';
 
 @Component({
   selector: 'app-create-edit-workout',
@@ -39,7 +43,7 @@ export class CreateEditWorkoutComponent implements OnChanges {
   exerciseSets: { [key: string]: ExerciseSet[] } = {};
   numberOfSets: { [key: string]: number } = {};
 
-  isRoutineRelated = false;
+  isRoutineRelated = true;
   routines: Routine[] = [];
   selectedRoutineId?: string;
   workoutDays: WorkoutDay[] = [];
@@ -47,14 +51,26 @@ export class CreateEditWorkoutComponent implements OnChanges {
   showRoutineError = false;
   showWorkoutDayError = false;
 
+  allExercises: Exercise[] = [];
+  selectedExerciseIds: string[] = [];
+  showExerciseError = false;
+
+  filterName: string = '';
+  filterBodyPartId: string = '';
+  bodyParts: BodyPart[] = [];
+
   constructor(
     private workoutService: WorkoutService,
-    private routineService: RoutineService
+    private routineService: RoutineService,
+    private workoutDayService: WorkoutDayService,
+    private exerciseService: ExerciseService,
+    private bodyPartService: BodyPartService
   ) {
-
     if (!this.workoutDayId) {
       this.loadRoutines();
     }
+    this.loadAllExercises();
+    this.loadBodyParts();
   }
 
   private loadRoutines(): void {
@@ -96,9 +112,16 @@ export class CreateEditWorkoutComponent implements OnChanges {
     const workoutDayId = select.value;
     this.selectedWorkoutDayId = workoutDayId;
 
-    this.exercises = [];
-    this.updateTotalSteps();
-    this.initializeExerciseSets();
+    this.workoutDayService.getExercisesByWorkoutDay(this.selectedWorkoutDayId).subscribe({
+      next: (exercises) => {
+        this.exercises = exercises;
+        this.updateTotalSteps();
+        this.initializeExerciseSets();
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load exercises';
+      }
+    });
   }
 
   getFormattedDate(): string {
@@ -164,10 +187,17 @@ export class CreateEditWorkoutComponent implements OnChanges {
           this.totalSteps = this.currentStep;
         }
       }
-    } else if (changes['exercises']) {
-      this.updateTotalSteps();
-      this.initializeExerciseSets();
     }
+    else if (changes['exercises']) {
+      if (this.selectedWorkoutDayId == null) {
+        this.totalSteps = 10;
+      }
+      else {
+        this.updateTotalSteps();
+      }
+
+      this.initializeExerciseSets();
+      }
   }
 
   private initializeExerciseSetsFromWorkout(): void {
@@ -181,7 +211,11 @@ export class CreateEditWorkoutComponent implements OnChanges {
   }
 
   private updateTotalSteps(): void {
-    this.totalSteps = this.exercises.length + 1;
+    if (this.isRoutineRelated) {
+      this.totalSteps = 1 + this.exercises.length;
+    } else {
+      this.totalSteps = 2 + this.exercises.length;
+    }
   }
 
   private initializeExerciseSets(): void {
@@ -211,8 +245,8 @@ export class CreateEditWorkoutComponent implements OnChanges {
         exerciseId: exerciseId,
         exercise: { id: exerciseId } as Exercise,
         order: currentSets.length + 1,
-        reps: 0,
-        weight: 0,
+        reps: 10,
+        weight: 20,
         createdAt: new Date(),
         updatedAt: new Date(),
         isDeleted: false
@@ -228,7 +262,13 @@ export class CreateEditWorkoutComponent implements OnChanges {
 
   getCurrentExercise(): Exercise | undefined {
     if (this.currentStep === 1) return undefined;
-    return this.exercises[this.currentStep - 2];
+
+    if (this.isRoutineRelated) {
+      return this.exercises[this.currentStep - 2];
+    }
+    else {
+      return this.exercises[this.currentStep - 3];
+    }
   }
 
   getCurrentExerciseSets(): ExerciseSet[] {
@@ -238,6 +278,25 @@ export class CreateEditWorkoutComponent implements OnChanges {
   }
 
   nextStep(): void {
+    if (!this.isRoutineRelated) {
+      if (this.currentStep === 1) {
+        this.currentStep++;
+        return;
+      }
+      if (this.currentStep === 2) {
+        if (!this.selectedExerciseIds.length) {
+          this.showExerciseError = true;
+          return;
+        }
+        this.showExerciseError = false;
+        this.exercises = this.allExercises.filter(e => this.selectedExerciseIds.includes(e.id));
+        this.updateTotalSteps();
+        this.initializeExerciseSets();
+        this.currentStep++;
+        return;
+      }
+    }
+
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
     }
@@ -253,17 +312,6 @@ export class CreateEditWorkoutComponent implements OnChanges {
     if (!this.workout.workoutDate) {
       this.error = 'Workout date is required';
       return;
-    }
-
-    if (this.isRoutineRelated) {
-      if (!this.selectedRoutineId) {
-        this.showRoutineError = true;
-        return;
-      }
-      if (!this.selectedWorkoutDayId) {
-        this.showWorkoutDayError = true;
-        return;
-      }
     }
 
     this.loading = true;
@@ -361,5 +409,52 @@ export class CreateEditWorkoutComponent implements OnChanges {
       this.numberOfSets[exerciseId] = value;
       this.updateSetsForExercise(exerciseId);
     }
+  }
+
+  loadAllExercises(): void {
+    this.exerciseService.getExercises().subscribe({
+      next: (exercises) => {
+        this.allExercises = exercises;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load exercises';
+      }
+    });
+  }
+
+  onExerciseCheckboxChange(event: Event, exerciseId: string): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) {
+      if (!this.selectedExerciseIds.includes(exerciseId)) {
+        this.selectedExerciseIds.push(exerciseId);
+      }
+    } else {
+      this.selectedExerciseIds = this.selectedExerciseIds.filter(id => id !== exerciseId);
+    }
+  }
+
+  loadBodyParts(): void {
+    this.bodyPartService.getBodyParts().subscribe({
+      next: (bodyParts) => {
+        this.bodyParts = bodyParts;
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to load body parts';
+      }
+    });
+  }
+
+  get filteredExercises(): Exercise[] {
+    return this.allExercises
+      .filter(e => {
+        const matchesName = this.filterName.trim() === '' || e.name.toLowerCase().includes(this.filterName.trim().toLowerCase());
+        const matchesBodyPart = !this.filterBodyPartId || e.bodyPart?.id === this.filterBodyPartId;
+        return matchesName && matchesBodyPart;
+      })
+      .sort((a, b) => {
+        const aSelected = this.selectedExerciseIds.includes(a.id) ? 0 : 1;
+        const bSelected = this.selectedExerciseIds.includes(b.id) ? 0 : 1;
+        return aSelected - bSelected;
+      });
   }
 } 

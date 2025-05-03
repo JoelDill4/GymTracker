@@ -1,8 +1,8 @@
 <div class="container fade-in">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="mb-0 fw-bold">
+    <h2 class="mb-0 fw-bold">
       <i class="bi bi-calendar-week me-2"></i>{{ routine?.name }}
-    </h1>
+    </h2>
     <app-new-button
       text="New Workout Day"
       (onClick)="onCreateWorkoutDay()">
@@ -11,39 +11,26 @@
 
   <p class="lead text-muted mb-4" *ngIf="routine?.description">{{ routine?.description }}</p>
 
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
-  </div>
-
-  <div *ngIf="!loading && !error">
-    <div *ngIf="workoutDays.length === 0" class="alert alert-info">
-      <i class="bi bi-info-circle me-2"></i>No workout days found. Click the Create Workout Day button to add one.
-    </div>
-
-    <app-list-card
-      [items]="workoutDays"
-      [showSearch]="false"
-      [showFilter]="false"
-      [icon]="'bi-calendar-check'"
-      [getItemTitle]="getWorkoutDayTitle"
-      [getItemDescription]="getWorkoutDayDescription"
-      [getItemBadge]="getWorkoutDayBadge"
-      [getItemRouterLink]="getWorkoutDayRouterLink"
-      (itemClick)="onWorkoutDayClick($event)">
-      <ng-template let-workoutDay>
-        <div class="d-flex gap-2">
-          <app-edit-button (onClick)="onEditWorkoutDay(workoutDay)"></app-edit-button>
-          <app-delete-button (onClick)="deleteWorkoutDay(workoutDay.id)"></app-delete-button>
-        </div>
-      </ng-template>
-    </app-list-card>
-  </div>
+  <app-list-card
+    [items]="workoutDays"
+    [loading]="loading"
+    [error]="error"
+    [emptyMessage]="'No workout days found. Click the Create Workout Day button to add one.'"
+    [showSearch]="false"
+    [showFilter]="false"
+    [icon]="'bi-calendar-check'"
+    [getItemTitle]="getWorkoutDayTitle"
+    [getItemDescription]="getWorkoutDayDescription"
+    [getItemBadge]="getWorkoutDayBadge"
+    [getItemRouterLink]="getWorkoutDayRouterLink"
+    (itemClick)="onWorkoutDayClick($event)">
+    <ng-template let-workoutDay>
+      <div class="d-flex gap-2">
+        <app-edit-button (onClick)="onEditWorkoutDay(workoutDay)"></app-edit-button>
+        <app-delete-button (onClick)="deleteWorkoutDay(workoutDay.id)"></app-delete-button>
+      </div>
+    </ng-template>
+  </app-list-card>
 </div>
 
 <app-create-edit-workout-day 

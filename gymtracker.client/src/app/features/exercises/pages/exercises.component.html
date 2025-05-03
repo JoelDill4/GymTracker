@@ -1,52 +1,45 @@
-<div class="container fade-in">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0 fw-bold">
-      <i class="bi bi-list-check me-2"></i>Exercises
-    </h2>
-    <app-new-button
-      text="New Exercise"
-      (onClick)="onCreateExercise()">
-    </app-new-button>
-  </div>
-
-  <app-list-card
-    [items]="filteredExercises"
-    [showSearch]="true"
-    [showFilter]="true"
-    [searchPlaceholder]="'Search exercises...'"
-    [filterPlaceholder]="'All Body Parts'"
-    [filterIcon]="'bi-person-arms-up'"
-    [filterOptions]="bodyParts"
-    [icon]="'bi-dumbbell'"
-    [getItemTitle]="getExerciseTitle"
-    [getItemDescription]="getExerciseDescription"
-    [getItemBadge]="getExerciseBadge"
-    [getItemRouterLink]="getExerciseRouterLink"
-    (search)="onSearch($event)"
-    (filter)="onFilter($event)"
-    (itemClick)="onExerciseClick($event)">
-    <ng-template let-exercise>
-      <div class="d-flex gap-2">
-        <app-edit-button (onClick)="onEditExercise(exercise)"></app-edit-button>
-        <app-delete-button (onClick)="onDeleteExercise(exercise.id)"></app-delete-button>
-      </div>
-    </ng-template>
-  </app-list-card>
-
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+<ng-container *ngIf="selectedSegment === 'My exercises'">
+  <div class="container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0 fw-bold">
+        <i class="bi bi-list-check me-2"></i>Exercises
+      </h2>
+      <app-new-button
+        text="New Exercise"
+        (onClick)="onCreateExercise()">
+      </app-new-button>
     </div>
-  </div>
 
-  <div *ngIf="error" class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <app-list-card
+      [items]="filteredExercises"
+      [loading]="loading"
+      [error]="error"
+      [emptyMessage]="'No exercises found. Click the Create Exercise button to add one.'"
+      [showSearch]="true"
+      [showFilter]="true"
+      [searchPlaceholder]="'Search exercises...'"
+      [filterPlaceholder]="'All Body Parts'"
+      [filterIcon]="'bi-person-arms-up'"
+      [filterOptions]="bodyParts"
+      [icon]="'bi-dumbbell'"
+      [getItemTitle]="getExerciseTitle"
+      [getItemDescription]="getExerciseDescription"
+      [getItemBadge]="getExerciseBadge"
+      [getItemRouterLink]="getExerciseRouterLink"
+      (search)="onSearch($event)"
+      (filter)="onFilter($event)"
+      (itemClick)="onExerciseClick($event)">
+      <ng-template let-exercise>
+        <div class="d-flex gap-2">
+          <app-edit-button (onClick)="onEditExercise(exercise)"></app-edit-button>
+          <app-delete-button (onClick)="onDeleteExercise(exercise.id)"></app-delete-button>
+        </div>
+      </ng-template>
+    </app-list-card>
   </div>
+</ng-container>
 
-  <div *ngIf="!loading && !error && filteredExercises.length === 0" class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>No exercises found. Click the Create Exercise button to add one.
-  </div>
-</div>
+<app-progression-chart *ngIf="selectedSegment === 'Progression chart'"></app-progression-chart>
 
 <app-create-edit-exercise *ngIf="showCreateModal"
                      [exerciseToEdit]="selectedExercise"

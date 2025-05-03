@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
+import { UpperNavbarComponent } from './shared/components/upper-navbar/upper-navbar.component';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,7 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     <div class="app-container">
       <app-navbar></app-navbar>
       <main class="main-content">
+        <app-upper-navbar></app-upper-navbar>
         <router-outlet></router-outlet>
       </main>
     </div>
@@ -35,13 +37,12 @@ import { NavbarComponent } from './shared/components/navbar/navbar.component';
     }
   `],
   standalone: true,
-  imports: [RouterOutlet, NavbarComponent]
+  imports: [RouterOutlet, NavbarComponent, UpperNavbarComponent]
 })
 export class AppComponent implements OnInit {
   title = 'gymtracker';
 
   constructor() {
-    console.log('AppComponent constructed');
   }
 
   ngOnInit() {

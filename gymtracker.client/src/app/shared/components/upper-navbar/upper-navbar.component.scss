@@ -1,0 +1,32 @@
+.upper-navbar {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 56px;
+  margin-bottom: 0.5rem;
+  gap: 2rem;
+}
+
+.segment {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #222;
+  padding: 0.5rem 1.5rem 0.25rem 1.5rem;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.segment:hover {
+  color: #1976d2;
+  background: #f5faff;
+}
+
+.segment.active {
+  color: #2196f3;
+  border-bottom: 3px solid #2196f3;
+  background: none;
+} 

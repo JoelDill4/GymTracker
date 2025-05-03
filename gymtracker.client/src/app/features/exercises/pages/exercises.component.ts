@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { NewButtonComponent } from '../../../shared/components/new-button/new-bu
 import { ListCardComponent, FilterOption } from '../../../shared/components/list-card/list-card.component';
 import { EditButtonComponent } from '../../../shared/components/edit-button/edit-button.component';
 import { DeleteButtonComponent } from '../../../shared/components/delete-button/delete-button.component';
+import { ProgressionChartComponent } from './progression-chart/progression-chart.component';
 
 @Component({
   selector: 'app-exercises',
@@ -23,12 +24,14 @@ import { DeleteButtonComponent } from '../../../shared/components/delete-button/
     NewButtonComponent, 
     ListCardComponent,
     EditButtonComponent,
-    DeleteButtonComponent
+    DeleteButtonComponent,
+    ProgressionChartComponent
   ],
   templateUrl: './exercises.component.html',
   styleUrl: './exercises.component.css'
 })
-export class ExercisesComponent implements OnInit, AfterViewInit {
+export class ExercisesComponent implements OnInit {
+  @Input() selectedSegment: string = 'My exercises';
   exercises: Exercise[] = [];
   filteredExercises: Exercise[] = [];
   bodyParts: BodyPart[] = [];
@@ -43,33 +46,24 @@ export class ExercisesComponent implements OnInit, AfterViewInit {
     private exerciseService: ExerciseService,
     private bodyPartService: BodyPartService
   ) {
-    console.log('ExercisesComponent constructed');
   }
 
   ngOnInit(): void {
-    console.log('ExercisesComponent initialized');
     this.loadExercises();
     this.loadBodyParts();
   }
 
-  ngAfterViewInit(): void {
-    console.log('ExercisesComponent view initialized');
-  }
-
   loadExercises(): void {
-    console.log('Loading exercises...');
     this.loading = true;
     this.error = null;
     this.exerciseService.getExercises().subscribe({
       next: (data) => {
-        console.log('Exercises loaded:', data);
         this.exercises = data;
         this.filteredExercises = data;
         this.applyFilters();
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading exercises:', error);
         this.error = 'Failed to load exercises';
         this.loading = false;
       }

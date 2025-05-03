@@ -1,0 +1,9 @@
+<div class="upper-navbar" *ngIf="segments.length">
+  <div 
+    *ngFor="let seg of segments" 
+    class="segment" 
+    [class.active]="selectedSegment === seg"
+    (click)="selectSegment(seg)">
+    {{ seg }}
+  </div>
+</div> 
